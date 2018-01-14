@@ -28,6 +28,7 @@ export class Controller {
     let Y_VALUE = 0;
     let X_VALUE = 0;
 
+
     // keyboard
     UP = this.game.input.keyboard.isDown(Phaser.Keyboard.UP);
     DOWN = this.game.input.keyboard.isDown(Phaser.Keyboard.DOWN);

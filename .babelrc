@@ -1,0 +1,10 @@
+{
+  "presets": [
+    "env"
+  ],
+  "sourceMaps": "inline",
+  "ignore": [
+    "phaser-plugin-isometric.min.js",
+    "phaser.min.js"
+  ]
+}
