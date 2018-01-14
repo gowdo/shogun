@@ -1,0 +1,21 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "rm -r build; webpack --config webpack.config.js;"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.24.1",
+    "babel-loader": "^7.1.1",
+    "babel-preset-env": "^1.6.0",
+    "copy-webpack-plugin": "^4.0.1",
+    "css-loader": "^0.28.5",
+    "html-loader": "^0.5.1",
+    "style-loader": "^0.18.2",
+    "svg-inline-loader": "^0.8.0",
+    "webpack": "^3.5.5"
+  },
+  "dependencies": {
+    "jquery": "^3.2.1"
+  }
+}
