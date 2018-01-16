@@ -7,6 +7,7 @@ export class Controller {
     this.viewBox = viewBox;
     this.boundsBoxA;
     this.boundsBoxB;
+    this.targetObj = null;
     this.pad1 = this.game.input.gamepad.pad1;
     this.game.input.gamepad.start();
     this.game.input.gamepad.setDeadZones(0.05);
@@ -16,37 +17,8 @@ export class Controller {
     this.player.body.velocity.x = 0;
     this.player.body.velocity.y = 0;
 
-    let UP = false;
-    let RIGHT = false;
-    let DOWN = false;
-    let LEFT = false;
-    let UP_RIGHT = false;
-    let DOWN_RIGHT = false;
-    let UP_LEFT = false;
-    let DOWN_LEFT = false;
-
     let Y_VALUE = 0;
     let X_VALUE = 0;
-
-
-    // keyboard
-    UP = this.game.input.keyboard.isDown(Phaser.Keyboard.UP);
-    DOWN = this.game.input.keyboard.isDown(Phaser.Keyboard.DOWN);
-    LEFT = this.game.input.keyboard.isDown(Phaser.Keyboard.LEFT);
-    RIGHT = this.game.input.keyboard.isDown(Phaser.Keyboard.RIGHT);
-
-    // gamepad
-    if (this.pad1.isDown(Phaser.Gamepad.XBOX360_DPAD_LEFT)) {
-      LEFT = true;
-    } else if (this.pad1.isDown(Phaser.Gamepad.XBOX360_DPAD_RIGHT)) {
-      RIGHT = true;
-    }
-
-    if (this.pad1.isDown(Phaser.Gamepad.XBOX360_DPAD_UP)) {
-      UP = true;
-    } else if (this.pad1.isDown(Phaser.Gamepad.XBOX360_DPAD_DOWN)) {
-      DOWN = true;
-    }
 
     if (this.pad1.axis(Phaser.Gamepad.XBOX360_STICK_LEFT_X) < -0.01) {
       X_VALUE = this.pad1.axis(Phaser.Gamepad.XBOX360_STICK_LEFT_X);
@@ -60,239 +32,127 @@ export class Controller {
       Y_VALUE = this.pad1.axis(Phaser.Gamepad.XBOX360_STICK_LEFT_Y);
     }
 
-    let stickUsed = (X_VALUE !== 0 || Y_VALUE !== 0);
 
-    const speed = 100;
-    const MULTIPLIER = 1.2;
+    const SPEED = 170;
     const HIT_RADIUS = 50;
     const TARGET_RADIUS = 100;
 
-    const aimLock = this.pad1.isDown((Phaser.Gamepad.XBOX360_LEFT_BUMPER));
+    // move player
+    const newPoints = rotate(0, 0, X_VALUE, Y_VALUE, 45);
+    this.player.body.velocity.x = newPoints[0] * SPEED;
+    this.player.body.velocity.y = newPoints[1] * SPEED;
 
-    if (aimLock === false) {
+    const aimLock = this.pad1.isDown(Phaser.Gamepad.XBOX360_LEFT_BUMPER);
+    const stickUsed = (X_VALUE !== 0 || Y_VALUE !== 0);
 
-      if (stickUsed) {
-        const newPoints = rotate(0, 0, X_VALUE, Y_VALUE, 45);
-        this.player.body.velocity.x = newPoints[0] * speed;
-        this.player.body.velocity.y = newPoints[1] * speed;
-        // console.log(newPoints[0], newPoints[1]);
-      } else {
+    let X = X_VALUE;
+    let Y = Y_VALUE;
 
-        if (UP && RIGHT) {
-          UP = false;
-          RIGHT = false;
-          UP_RIGHT = true;
-        }
+    if (aimLock) {
+      X = -(this.player.position.x - this.targetBox.x);
+      Y = -(this.player.position.y - this.targetBox.y);
+    }
 
-        if (UP && LEFT) {
-          UP = false;
-          LEFT = false;
-          UP_LEFT = true;
-        }
+    const angle = getAngleDeg(X, -Y);
 
-        if (DOWN && RIGHT) {
-          DOWN = false;
-          RIGHT = false;
-          DOWN_RIGHT = true;
-        }
+    if (angle < 30 || angle > 330) {
+      this.player.animations.play('N');
+    }
+    else if (angle < 60) {
+      this.player.animations.play('NE');
+    }
+    else if (angle < 120) {
+      this.player.animations.play('E');
+    }
+    else if (angle < 150) {
+      this.player.animations.play('SE');
+    }
+    else if (angle < 210) {
+      this.player.animations.play('S');
+    }
+    else if (angle < 240) {
+      this.player.animations.play('SW');
+    }
+    else if (angle < 300) {
+      this.player.animations.play('W');
+    }
+    else if (angle < 330) {
+      this.player.animations.play('NW');
+    }
+    else {
+      this.player.animations.stop();
+    }
 
-        if (DOWN && LEFT) {
-          DOWN = false;
-          LEFT = false;
-          DOWN_LEFT = true;
-        }
+    if (stickUsed) {
 
-        // dpad checks
-        if (UP) {
-          this.player.body.velocity.y = -speed;
-          this.player.body.velocity.x = -speed;
-        } else if (DOWN) {
-          this.player.body.velocity.y = speed;
-          this.player.body.velocity.x = speed;
-        } else if (RIGHT) {
-          this.player.body.velocity.x = speed;
-          this.player.body.velocity.y = -speed;
-        } else if (LEFT) {
-          this.player.body.velocity.x = -speed;
-          this.player.body.velocity.y = speed;
-        } else if (DOWN_RIGHT) {
-          this.player.body.velocity.x = (speed * MULTIPLIER);
-          // this.player.body.velocity.x = speed*MULTIPLIER;
-          this.player.body.velocity.y = 0;
-        } else if (DOWN_LEFT) {
-          // this.player.body.velocity.y = speed*MULTIPLIER;
-          this.player.body.velocity.y = (speed * MULTIPLIER);
-          this.player.body.velocity.x = 0;
-        } else if (UP_LEFT) {
-          // this.player.body.velocity.x = -speed*MULTIPLIER;
-          this.player.body.velocity.x = -(speed * MULTIPLIER);
-          this.player.body.velocity.y = 0;
+      const HYP = Math.sqrt((X * X) + (Y * Y));
+      const hitScaler = HIT_RADIUS / HYP;
+      this.hitBox.x = this.player.position.x + hitScaler * X;
+      this.hitBox.y = this.player.position.y + hitScaler * Y;
 
-        } else if (UP_RIGHT) {
-          // this.player.body.velocity.y = -speed*MULTIPLIER;
-          this.player.body.velocity.y = -(speed * MULTIPLIER);
-          this.player.body.velocity.x = 0;
-        } else {
-          this.player.body.velocity.x = 0;
-          this.player.body.velocity.y = 0;
-        }
+      if (aimLock === false) {
+        // if no aim lock, move the targetBox
+        const targetScaler = TARGET_RADIUS / HYP;
+        this.targetBox.x = this.player.position.x + targetScaler * X;
+        this.targetBox.y = this.player.position.y + targetScaler * Y;
       }
+    }
 
-      const angle = getAngleDeg(X_VALUE, -Y_VALUE);
-      const hitBoxPos = { x: 0, y: 0 };
-      const targetBoxPos = { x: 0, y: 0 };
-      // const viewBoxPos = { x: 0, y: 0 };
+    if (aimLock && this.targetObj !== null) {
+      this.targetBox.x = this.targetObj.position.x;
+      this.targetBox.y = this.targetObj.position.y;
+    }
 
-      if (UP || (angle < 30 || angle > 330)) {
-        this.player.animations.play('N');
-      }
-      else if (UP_RIGHT || (angle < 60)) {
-        this.player.animations.play('NE');
-      }
-      else if (RIGHT || (angle < 120)) {
-        this.player.animations.play('E');
-      }
-      else if (DOWN_RIGHT || (angle < 150)) {
-        this.player.animations.play('SE');
-      }
-      else if (DOWN || (angle < 210)) {
-        this.player.animations.play('S');
-      }
-      else if (DOWN_LEFT || (angle < 240)) {
-        this.player.animations.play('SW');
-      }
-      else if (LEFT || (angle < 300)) {
-        this.player.animations.play('W');
-      }
-      else if (UP_LEFT || (angle < 330)) {
-        this.player.animations.play('NW');
-      }
-      else {
-        this.player.animations.stop();
-      }
+    this.drawTargetBoundsBoxes();
 
-      this.player.body.velocity.y = this.player.body.velocity.y * 1.5;
-      this.player.body.velocity.x = this.player.body.velocity.x * 1.5;
-
-      /*
-      const direction = this.player.animations.currentAnim.name;
-      // console.log(direction);
-      if (direction === 'N') {
-        // hitBoxPos.x = -50;
-        // hitBoxPos.y = -30;
-        // targetBoxPos.x = 30;
-        // targetBoxPos.y = -100;
-      } else if(direction === 'NE') {
-        // hitBoxPos.x = -20;
-        // hitBoxPos.y = -30;
-        // targetBoxPos.x = -20;
-        // targetBoxPos.y = -30;
-      } else if(direction === 'E') {
-        // hitBoxPos.x = 0;
-        // hitBoxPos.y = 0;
-        // targetBoxPos.x = 160;
-        // targetBoxPos.y = -12;
-      } else if(direction === 'SE') {
-        // hitBoxPos.x = -20;
-        // hitBoxPos.y = 30;
-        // targetBoxPos.x = -20;
-        // targetBoxPos.y = 30;
-      } else if(direction === 'S') {
-        // hitBoxPos.x = -50;
-        // hitBoxPos.y = 30;
-        // targetBoxPos.x = 30;
-        // targetBoxPos.y = 90;
-      } else if(direction === 'SW') {
-        // hitBoxPos.x = -80;
-        // hitBoxPos.y = 30;
-        // targetBoxPos.x = -80;
-        // targetBoxPos.y = 30;
-      } else if(direction === 'W') {
-        // hitBoxPos.x = -100;
-        // hitBoxPos.y = -0;
-        // targetBoxPos.x = -100;
-        // targetBoxPos.y = -12;
-      } else if(direction === 'NW') {
-        // hitBoxPos.x = -80;
-        // hitBoxPos.y = -30;
-        // targetBoxPos.x = -80;
-        // targetBoxPos.y = -30;
-      }
-      */
-
-      const hitScaler = HIT_RADIUS / Math.sqrt((X_VALUE * X_VALUE) + (Y_VALUE * Y_VALUE));
-      const targetScaler = TARGET_RADIUS / Math.sqrt((X_VALUE * X_VALUE) + (Y_VALUE * Y_VALUE));
-
-      this.targetBox.x = this.player.position.x + targetScaler * X_VALUE;
-      this.targetBox.y = this.player.position.y + targetScaler * Y_VALUE;
-      this.hitBox.x = this.player.position.x + hitScaler * X_VALUE;
-      this.hitBox.y = this.player.position.y + hitScaler * Y_VALUE;
-
-      if (this.game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR) || this.pad1.isDown(Phaser.Gamepad.XBOX360_A)) {
-        // this.hitBox.x = this.player.position.x + hitBoxPos.x;
-        // this.hitBox.y = this.player.position.y + hitBoxPos.y;
-        this.drawHitBoundsBoxes();
-      } else {
-        this.hitBox.x = -100000;
-        this.hitBox.y = 0;
-      }
-
-      // this.viewBox.x = this.player.position.x + viewBoxPos.x - 40;
-      // this.viewBox.y = this.player.position.y + viewBoxPos.y + 30;
+    if (this.pad1.isDown(Phaser.Gamepad.XBOX360_A)) {
+      this.hitBox.visible = true;
+      this.drawHitBoundsBoxes();
     } else {
+      this.hitBox.visible = false;
+    }
+  }
 
-      const newPoints = rotate(0, 0, X_VALUE, Y_VALUE, 45);
-      this.player.body.velocity.x = newPoints[0] * speed;
-      this.player.body.velocity.y = newPoints[1] * speed;
-      // console.log(newPoints[0], newPoints[1]);
-      const o = this.player.position.x - this.targetBox.x;
-      const a = this.player.position.y - this.targetBox.y;
+  drawTargetBoundsBoxes() {
+    this.targetObj = null;
+    const offsetYA = this.hitBox.height / 2;
+    const boundsA = {
+      x: this.targetBox.x - offsetYA,
+      y: this.targetBox.y - offsetYA,
+      height: this.targetBox.height,
+      width: this.targetBox.width,
+      right: this.targetBox.x + this.targetBox.width - offsetYA,
+      bottom: this.targetBox.y + this.targetBox.height - offsetYA
+    };
 
-      const angleRad = Math.atan(o / a);
-      const angDeg = angleRad * 180 / Math.PI;
-      // console.log(angDeg);
-      const angle = getAngleDeg(-o, a);
-      // console.log(angle);
-      if (UP || (angle < 30 || angle > 330)) {
-        this.player.animations.play('N');
+    this.game.world.children[3].children.forEach((obj) => {
+      if (obj.key !== 'characterAnim') {
+        const offsetXB = obj.width / 2;
+        const offsetYB = obj.height / 2;
+        const boundsB = {
+          x: obj.position.x - offsetXB,
+          y: obj.position.y - offsetYB,
+          height: obj.height,
+          width: obj.width,
+          right: obj.position.x + obj.width - offsetXB,
+          bottom: obj.position.y + obj.height - offsetYB
+        };
+        if (Phaser.Rectangle.intersects(boundsA, boundsB)) {
+          if (this.boundsBoxB !== undefined) {
+            this.boundsBoxB.kill();
+          }
+          this.boundsBoxB = drawBoundsBox(this.game, boundsB, 0xFFFFFF);
+          this.targetObj = obj;
+        }
       }
-      else if (UP_RIGHT || (angle < 60)) {
-        this.player.animations.play('NE');
+    });
+    if (this.targetObj ===  null) {
+      if (this.boundsBoxA !== undefined) {
+        this.boundsBoxA.kill();
       }
-      else if (RIGHT || (angle < 120)) {
-        this.player.animations.play('E');
+      if (this.boundsBoxB !== undefined) {
+        this.boundsBoxB.kill();
       }
-      else if (DOWN_RIGHT || (angle < 150)) {
-        this.player.animations.play('SE');
-      }
-      else if (DOWN || (angle < 210)) {
-        this.player.animations.play('S');
-      }
-      else if (DOWN_LEFT || (angle < 240)) {
-        this.player.animations.play('SW');
-      }
-      else if (LEFT || (angle < 300)) {
-        this.player.animations.play('W');
-      }
-      else if (UP_LEFT || (angle < 330)) {
-        this.player.animations.play('NW');
-      }
-      else {
-        this.player.animations.stop();
-      }
-
-      const hitScaler = HIT_RADIUS / Math.sqrt((o * o) + (a * a));
-      this.hitBox.x = this.player.position.x + hitScaler * -o;
-      this.hitBox.y = this.player.position.y + hitScaler * -a;
-
-      if (this.game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR) || this.pad1.isDown(Phaser.Gamepad.XBOX360_A)) {
-        this.drawHitBoundsBoxes();
-      } else {
-        this.hitBox.x = -100000;
-        this.hitBox.y = 0;
-      }
-
-
     }
   }
 
@@ -324,12 +184,14 @@ export class Controller {
         // console.log('b', boundsB);
         // console.log('b', this.game.world.children[3].children[0].position);
         if (Phaser.Rectangle.intersects(boundsA, boundsB)) {
-          if (this.boundsBoxA !== undefined && this.boundsBoxB !== undefined) {
+          if (this.boundsBoxA !== undefined) {
             this.boundsBoxA.kill();
+          }
+          if (this.boundsBoxB !== undefined) {
             this.boundsBoxB.kill();
           }
-          this.boundsBoxA = drawBoundsBox(this.game, boundsA);
-          this.boundsBoxB = drawBoundsBox(this.game, boundsB);
+          this.boundsBoxA = drawBoundsBox(this.game, boundsA, 0x0000FF);
+          this.boundsBoxB = drawBoundsBox(this.game, boundsB, 0x0000FF);
           console.log(`${tree.key} hit`);
         }
       }
@@ -358,7 +220,7 @@ function getAngleDeg(x, y) {
   }
 }
 
-function drawBoundsBox(game, bounds) {
+function drawBoundsBox(game, bounds, color) {
   const hitBox = game.add.graphics(0, 0);
   hitBox.anchor.set(0);
   // hitBox.cameraOffset.x = 200;
@@ -367,7 +229,7 @@ function drawBoundsBox(game, bounds) {
 
   // set a fill and line style
   // hitBox.beginFill(0xFF3300);
-  hitBox.lineStyle(1, 0x0000FF);
+  hitBox.lineStyle(1, color);
 
   // // draw a shape
   hitBox.moveTo(bounds.x, bounds.y);
