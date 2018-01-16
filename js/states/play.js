@@ -198,15 +198,17 @@ export class Play extends Phaser.State {
     player.anchor.set(0.5);
 
     const hitBox = this.game.add.graphics(0, 0);
-    hitBox.anchor.set(0.5);
-    hitBox.beginFill(0xFF3300);
-    hitBox.lineStyle(0, 0xffd900, 1);
-    hitBox.moveTo(...convertIsoArray(0, 0));
-    hitBox.lineTo(...convertIsoArray(50, 0));
-    hitBox.lineTo(...convertIsoArray(50, 50));
-    hitBox.lineTo(...convertIsoArray(0, 50));
-    hitBox.lineTo(...convertIsoArray(0, 0));
-    hitBox.endFill();
+    // hitBox.anchor.set(0.5);
+    // hitBox.beginFill(0xFF3300);
+    // hitBox.lineStyle(0, 0xffd900, 1);
+    // hitBox.moveTo(...convertIsoArray(0, 0));
+    // hitBox.lineTo(...convertIsoArray(50, 0));
+    // hitBox.lineTo(...convertIsoArray(50, 50));
+    // hitBox.lineTo(...convertIsoArray(0, 50));
+    // hitBox.lineTo(...convertIsoArray(0, 0));
+    // hitBox.endFill();
+    hitBox.beginFill(0x0000FF, 1);
+    hitBox.drawCircle(0, 0, 10);
 
     const viewBox = this.game.add.graphics(0, 0);
     viewBox.anchor.set(0.5);
@@ -219,15 +221,17 @@ export class Play extends Phaser.State {
     viewBox.endFill();
 
     const targetBox = this.game.add.graphics(0, 0);
-    targetBox.anchor.set(0.5);
-    targetBox.beginFill(0xFFFFFF);
-    targetBox.lineStyle(0, 0xffd900, 1);
-    targetBox.moveTo(...convertIsoArray(0, 0));
-    targetBox.lineTo(...convertIsoArray(10, 0));
-    targetBox.lineTo(...convertIsoArray(10, 10));
-    targetBox.lineTo(...convertIsoArray(0, 10));
-    targetBox.lineTo(...convertIsoArray(0, 0));
-    targetBox.endFill();
+    // targetBox.anchor.set(0.5);
+    // targetBox.beginFill(0xFFFFFF);
+    // targetBox.lineStyle(0, 0xffd900, 1);
+    // targetBox.moveTo(...convertIsoArray(0, 0));
+    // targetBox.lineTo(...convertIsoArray(10, 0));
+    // targetBox.lineTo(...convertIsoArray(10, 10));
+    // targetBox.lineTo(...convertIsoArray(0, 10));
+    // targetBox.lineTo(...convertIsoArray(0, 0));
+    // targetBox.endFill();
+    targetBox.beginFill(0xFFFFFF, 1);
+    targetBox.drawCircle(0, 0, 10);
 
     // this.game.physics.isoArcade.enable(hitBox);
     // hitBox.body.collideWorldBounds = true;
