@@ -293,9 +293,9 @@ export class Play extends Phaser.State {
   }
 
   render() {
-    obstacleGroup.forEach((tile) => {
-      this.game.debug.body(tile, 'rgba(189, 221, 235, 0.6)', false);
-    });
+    // obstacleGroup.forEach((tile) => {
+    //   this.game.debug.body(tile, 'rgba(189, 221, 235, 0.6)', false);
+    // });
   }
 }
 

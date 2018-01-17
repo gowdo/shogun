@@ -13,6 +13,7 @@ export class Controller {
     this.boundsBoxA;
     this.boundsBoxB;
     this.targetObj = null;
+    this.lockedTargetObj = null;
     this.pad1 = this.game.input.gamepad.pad1;
     this.game.input.gamepad.start();
     this.game.input.gamepad.setDeadZones(0.05);
@@ -111,8 +112,11 @@ export class Controller {
     }
 
     if (aimLock && this.targetObj !== null) {
+      this.lockedTargetObj = this.targetObj;
       this.targetBox.x = this.targetObj.position.x;
       this.targetBox.y = this.targetObj.position.y;
+    } else {
+      this.lockedTargetObj = null;
     }
 
     this.drawTargetBoundsBoxes();
@@ -129,38 +133,71 @@ export class Controller {
 
   drawTargetBoundsBoxes() {
     this.targetObj = null;
-    const offsetYA = this.hitBox.height / 2;
-    const boundsA = {
-      x: this.viewBox.x - offsetYA,
-      y: this.viewBox.y - offsetYA,
-      height: this.viewBox.height,
-      width: this.viewBox.width,
-      right: this.viewBox.x + this.viewBox.width - offsetYA,
-      bottom: this.viewBox.y + this.viewBox.height - offsetYA
-    };
 
     let tempTargetObj = null;
-    this.game.world.children[3].children.forEach((obj) => {
-      if (obj.key !== 'characterAnim') {
-        const offsetXB = obj.width / 2;
-        const offsetYB = obj.height / 2;
-        const boundsB = {
-          x: obj.position.x - offsetXB,
-          y: obj.position.y - offsetYB,
-          height: obj.height,
-          width: obj.width,
-          right: obj.position.x + obj.width - offsetXB,
-          bottom: obj.position.y + obj.height - offsetYB
-        };
-        if (inView(this.viewBox, boundsB) && tempTargetObj === null) {
-          if (this.boundsBoxB !== undefined) {
-            this.boundsBoxB.kill();
+    let targetBounds = null;
+
+    if (this.lockedTargetObj === null) {
+      // if there is no locked target, find the targetable object
+      const targets = this.game.world.children[3].children;
+      const playerX = this.player.position.x;
+      const playerY = this.player.position.y;
+      let closestTarget = {
+        target: null,
+        distance: Number.MAX_SAFE_INTEGER,
+        bounds: null
+      };
+
+      for (let i = 0; i < targets.length; i++) {
+        const target = targets[i];
+        if (target.key !== 'characterAnim') {
+          const offsetXB = target.width / 2;
+          const offsetYB = target.height / 2;
+          const boundsB = {
+            x: target.position.x - offsetXB,
+            y: target.position.y - offsetYB,
+            height: target.height,
+            width: target.width,
+            right: target.position.x + target.width - offsetXB,
+            bottom: target.position.y + target.height - offsetYB
+          };
+
+          if (inView(this.viewBox, boundsB) && tempTargetObj === null) {
+            const xDiff = (target.position.x > playerX) ? target.position.x - playerX : playerX - target.position.x;
+            const yDiff = (target.position.y > playerY) ? target.position.y - playerY : playerY - target.position.y;
+            const diff = xDiff + yDiff;
+            if (diff < closestTarget.distance) {
+              closestTarget.distance = diff;
+              closestTarget.target = target;
+              closestTarget.bounds = boundsB;
+            }
           }
-          this.boundsBoxB = drawBoundsBox(this.game, boundsB, 0xFFFFFF);
-          tempTargetObj = obj;
         }
       }
-    });
+
+      tempTargetObj = closestTarget.target;
+      targetBounds = closestTarget.bounds;
+    } else {
+      // else reselect the target
+      tempTargetObj = this.lockedTargetObj;
+      const offsetXB = tempTargetObj.width / 2;
+      const offsetYB = tempTargetObj.height / 2;
+      targetBounds = {
+        x: tempTargetObj.position.x - offsetXB,
+        y: tempTargetObj.position.y - offsetYB,
+        height: tempTargetObj.height,
+        width: tempTargetObj.width,
+        right: tempTargetObj.position.x + tempTargetObj.width - offsetXB,
+        bottom: tempTargetObj.position.y + tempTargetObj.height - offsetYB
+      };
+    }
+
+    if (this.boundsBoxB !== undefined) {
+      this.boundsBoxB.kill();
+    }
+    if (targetBounds !== null) {
+      this.boundsBoxB = drawBoundsBox(this.game, targetBounds, 0xFFFFFF);
+    }
 
     this.targetObj = tempTargetObj;
 
@@ -273,22 +310,6 @@ function inView(viewBox, targetBounds) {
     [targetBounds.right, targetBounds.y],
     [targetBounds.right, targetBounds.bottom],
     [targetBounds.x, targetBounds.bottom],
-  ];
-  return overlap(b1, b2);
-}
-
-function intersects2(boundsA, boundsB) {
-  const b1 = [
-    [boundsA.x, boundsA.y],
-    [boundsA.right, boundsA.y],
-    [boundsA.right, boundsA.bottom],
-    [boundsA.x, boundsA.bottom],
-  ];
-  const b2 = [
-    [boundsB.x, boundsB.y],
-    [boundsB.right, boundsB.y],
-    [boundsB.right, boundsB.bottom],
-    [boundsB.x, boundsB.bottom],
   ];
   return overlap(b1, b2);
 }
