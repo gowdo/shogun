@@ -142,11 +142,7 @@ export class Controller {
       const targets = this.game.world.children[3].children;
       const playerX = this.player.position.x;
       const playerY = this.player.position.y;
-      let closestTarget = {
-        target: null,
-        distance: Number.MAX_SAFE_INTEGER,
-        bounds: null
-      };
+      let closestTargetDistance = Number.MAX_SAFE_INTEGER;
 
       for (let i = 0; i < targets.length; i++) {
         const target = targets[i];
@@ -162,21 +158,18 @@ export class Controller {
             bottom: target.position.y + target.height - offsetYB
           };
 
-          if (inView(this.viewBox, boundsB) && tempTargetObj === null) {
+          if (inView(this.viewBox, boundsB)) {
             const xDiff = (target.position.x > playerX) ? target.position.x - playerX : playerX - target.position.x;
             const yDiff = (target.position.y > playerY) ? target.position.y - playerY : playerY - target.position.y;
             const diff = xDiff + yDiff;
-            if (diff < closestTarget.distance) {
-              closestTarget.distance = diff;
-              closestTarget.target = target;
-              closestTarget.bounds = boundsB;
+            if (diff < closestTargetDistance) {
+              closestTargetDistance = diff;
+              tempTargetObj = target;
+              targetBounds = boundsB;
             }
           }
         }
       }
-
-      tempTargetObj = closestTarget.target;
-      targetBounds = closestTarget.bounds;
     } else {
       // else reselect the target
       tempTargetObj = this.lockedTargetObj;
