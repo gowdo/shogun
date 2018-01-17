@@ -1,3 +1,8 @@
+// const pp = require('polygon-overlap');
+// require('../../node_modules/polygon-overlap/index.js');
+
+import { overlap } from '../utils/polygon_overlap.js';
+
 export class Controller {
   constructor(game, player, hitBox, viewBox, targetBox) {
     this.game = game;
@@ -43,7 +48,7 @@ export class Controller {
     this.player.body.velocity.y = newPoints[1] * SPEED;
 
     const aimLock = this.pad1.isDown(Phaser.Gamepad.XBOX360_LEFT_BUMPER);
-    const stickUsed = (X_VALUE !== 0 || Y_VALUE !== 0);
+    const moving = (X_VALUE !== 0 || Y_VALUE !== 0);
 
     let X = X_VALUE;
     let Y = Y_VALUE;
@@ -83,18 +88,25 @@ export class Controller {
       this.player.animations.stop();
     }
 
-    if (stickUsed) {
+    if (moving) {
 
       const HYP = Math.sqrt((X * X) + (Y * Y));
       const hitScaler = HIT_RADIUS / HYP;
       this.hitBox.x = this.player.position.x + hitScaler * X;
       this.hitBox.y = this.player.position.y + hitScaler * Y;
 
+      this.viewBox.x = this.player.position.x;
+      this.viewBox.y = this.player.position.y;
+
+      this.viewBox.angle = angle;
+
       if (aimLock === false) {
         // if no aim lock, move the targetBox
         const targetScaler = TARGET_RADIUS / HYP;
         this.targetBox.x = this.player.position.x + targetScaler * X;
         this.targetBox.y = this.player.position.y + targetScaler * Y;
+        // this.targetBox.x = this.player.position.x + X * 100;
+        // this.targetBox.y = this.player.position.y + Y * 100;
       }
     }
 
@@ -104,6 +116,8 @@ export class Controller {
     }
 
     this.drawTargetBoundsBoxes();
+
+    this.targetBox.visible = (aimLock && this.targetObj !== null);
 
     if (this.pad1.isDown(Phaser.Gamepad.XBOX360_A)) {
       this.hitBox.visible = true;
@@ -117,14 +131,15 @@ export class Controller {
     this.targetObj = null;
     const offsetYA = this.hitBox.height / 2;
     const boundsA = {
-      x: this.targetBox.x - offsetYA,
-      y: this.targetBox.y - offsetYA,
-      height: this.targetBox.height,
-      width: this.targetBox.width,
-      right: this.targetBox.x + this.targetBox.width - offsetYA,
-      bottom: this.targetBox.y + this.targetBox.height - offsetYA
+      x: this.viewBox.x - offsetYA,
+      y: this.viewBox.y - offsetYA,
+      height: this.viewBox.height,
+      width: this.viewBox.width,
+      right: this.viewBox.x + this.viewBox.width - offsetYA,
+      bottom: this.viewBox.y + this.viewBox.height - offsetYA
     };
 
+    let tempTargetObj = null;
     this.game.world.children[3].children.forEach((obj) => {
       if (obj.key !== 'characterAnim') {
         const offsetXB = obj.width / 2;
@@ -137,15 +152,18 @@ export class Controller {
           right: obj.position.x + obj.width - offsetXB,
           bottom: obj.position.y + obj.height - offsetYB
         };
-        if (Phaser.Rectangle.intersects(boundsA, boundsB)) {
+        if (inView(this.viewBox, boundsB) && tempTargetObj === null) {
           if (this.boundsBoxB !== undefined) {
             this.boundsBoxB.kill();
           }
           this.boundsBoxB = drawBoundsBox(this.game, boundsB, 0xFFFFFF);
-          this.targetObj = obj;
+          tempTargetObj = obj;
         }
       }
     });
+
+    this.targetObj = tempTargetObj;
+
     if (this.targetObj ===  null) {
       if (this.boundsBoxA !== undefined) {
         this.boundsBoxA.kill();
@@ -181,8 +199,6 @@ export class Controller {
           bottom: tree.position.y + tree.height - offsetYB,
           type: 22
         };
-        // console.log('b', boundsB);
-        // console.log('b', this.game.world.children[3].children[0].position);
         if (Phaser.Rectangle.intersects(boundsA, boundsB)) {
           if (this.boundsBoxA !== undefined) {
             this.boundsBoxA.kill();
@@ -210,7 +226,7 @@ function rotate(cx, cy, x, y, angle) {
 
 function getAngleDeg(x, y) {
   const angleRad = Math.atan(x / y);
-  const angDeg = angleRad * 180 / Math.PI;
+  const angDeg = toDegrees(angleRad);
   if (y <= 0) {
     return 180 + angDeg;
   } else if (x <= 0) {
@@ -220,18 +236,18 @@ function getAngleDeg(x, y) {
   }
 }
 
+function toDegrees(angle) {
+  return angle * (180 / Math.PI);
+}
+
+function toRadians(angle) {
+  return angle * (Math.PI / 180);
+}
+
 function drawBoundsBox(game, bounds, color) {
   const hitBox = game.add.graphics(0, 0);
   hitBox.anchor.set(0);
-  // hitBox.cameraOffset.x = 200;
-  // debugger
-  // hitBox = this.game.add.isoSprite(100, 100, 0, 'hitBox', 0, obstacleGroup);
-
-  // set a fill and line style
-  // hitBox.beginFill(0xFF3300);
   hitBox.lineStyle(1, color);
-
-  // // draw a shape
   hitBox.moveTo(bounds.x, bounds.y);
   hitBox.lineTo(bounds.right, bounds.y);
   hitBox.lineTo(bounds.right, bounds.bottom);
@@ -239,4 +255,40 @@ function drawBoundsBox(game, bounds, color) {
   hitBox.lineTo(bounds.x, bounds.y);
 
   return hitBox;
+}
+
+function inView(viewBox, targetBounds) {
+  const b1 = [];
+  const points = viewBox.graphicsData[0].shape.points;
+  for (let i = 0; i < points.length; i+=2) {
+    const p = rotate(0,0, points[i], points[i+1], viewBox.angle);
+    b1.push([
+      -p[0] + viewBox.position.x,
+      p[1] + viewBox.position.y
+    ]);
+  }
+
+  const b2 = [
+    [targetBounds.x, targetBounds.y],
+    [targetBounds.right, targetBounds.y],
+    [targetBounds.right, targetBounds.bottom],
+    [targetBounds.x, targetBounds.bottom],
+  ];
+  return overlap(b1, b2);
+}
+
+function intersects2(boundsA, boundsB) {
+  const b1 = [
+    [boundsA.x, boundsA.y],
+    [boundsA.right, boundsA.y],
+    [boundsA.right, boundsA.bottom],
+    [boundsA.x, boundsA.bottom],
+  ];
+  const b2 = [
+    [boundsB.x, boundsB.y],
+    [boundsB.right, boundsB.y],
+    [boundsB.right, boundsB.bottom],
+    [boundsB.x, boundsB.bottom],
+  ];
+  return overlap(b1, b2);
 }

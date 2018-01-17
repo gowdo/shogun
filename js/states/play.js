@@ -212,12 +212,18 @@ export class Play extends Phaser.State {
 
     const viewBox = this.game.add.graphics(0, 0);
     viewBox.anchor.set(0.5);
-    viewBox.beginFill(0xFF3300);
+    viewBox.beginFill(0xFFFFFF);
     viewBox.lineStyle(0, 0xffd900, 1);
-    viewBox.moveTo(...convertIsoArray(0, 40));
-    viewBox.lineTo(...convertIsoArray(200, 0));
-    viewBox.lineTo(...convertIsoArray(200, 80));
-    viewBox.lineTo(...convertIsoArray(0, 40));
+    // viewBox.moveTo(...convertIsoArray(0, 0));
+    // viewBox.lineTo(...convertIsoArray(200, -40));
+    // viewBox.lineTo(...convertIsoArray(200, 40));
+    // viewBox.lineTo(...convertIsoArray(0, 0));
+    viewBox.moveTo(0, 0);
+    viewBox.lineTo(100, -600);
+    viewBox.lineTo(-100, -600);
+    viewBox.lineTo(0, 0);
+    viewBox.alpha = 0;
+
     viewBox.endFill();
 
     const targetBox = this.game.add.graphics(0, 0);
