@@ -40,36 +40,36 @@ export class Play extends Phaser.State {
     this.game.physics.isoArcade.gravity.setTo(0, 0, -500);
 
     // create the floor tiles
-    let floorTile;
-    for (let xt = SIZE; xt > 0; xt -= 35) {
-      for (let yt = SIZE; yt > 0; yt -= 35) {
-        floorTile = this.game.add.isoSprite(xt, yt, 0, 'tile', 0, floorGroup);
-        floorTile.anchor.set(0.5);
+    // let floorTile;
+    // for (let xt = SIZE; xt > 0; xt -= 35) {
+    //   for (let yt = SIZE; yt > 0; yt -= 35) {
+    //     floorTile = this.game.add.isoSprite(xt, yt, 0, 'tile', 0, floorGroup);
+    //     floorTile.anchor.set(0.5);
 
-      }
-    }
+    //   }
+    // }
 
-    // create the grass tiles randomly
-    let grassTile;
-    for (let xt = SIZE; xt > 0; xt -= 35) {
-      for (let yt = SIZE; yt > 0; yt -= 35) {
+    // // create the grass tiles randomly
+    // let grassTile;
+    // for (let xt = SIZE; xt > 0; xt -= 35) {
+    //   for (let yt = SIZE; yt > 0; yt -= 35) {
 
-        const rnd = rndNum(20);
+    //     const rnd = rndNum(20);
 
-        if (rnd == 0) {
-          grassTile = this.game.add.isoSprite(xt, yt, 0, 'grass1', 0, grassGroup);
-          grassTile.anchor.set(0.5);
-        }
-        else if (rnd == 1) {
-          grassTile = this.game.add.isoSprite(xt, yt, 0, 'grass2', 0, grassGroup);
-          grassTile.anchor.set(0.5);
-        }
-        else if (rnd == 2) {
-          grassTile = this.game.add.isoSprite(xt, yt, 0, 'grass3', 0, grassGroup);
-          grassTile.anchor.set(0.5);
-        }
-      }
-    }
+    //     if (rnd == 0) {
+    //       grassTile = this.game.add.isoSprite(xt, yt, 0, 'grass1', 0, grassGroup);
+    //       grassTile.anchor.set(0.5);
+    //     }
+    //     else if (rnd == 1) {
+    //       grassTile = this.game.add.isoSprite(xt, yt, 0, 'grass2', 0, grassGroup);
+    //       grassTile.anchor.set(0.5);
+    //     }
+    //     else if (rnd == 2) {
+    //       grassTile = this.game.add.isoSprite(xt, yt, 0, 'grass3', 0, grassGroup);
+    //       grassTile.anchor.set(0.5);
+    //     }
+    //   }
+    // }
 
     // create an immovable cactus tile and randomly choose one of two graphical cactus representations
     let cactus1;
@@ -105,6 +105,7 @@ export class Play extends Phaser.State {
 
         rock = this.game.add.isoSprite(xt + 80, yt + 80, 0, 'rock', 0, obstacleGroup);
         rock.anchor.set(0.5);
+        rock.hitCount = 0;
 
         // Let the physics engine do its job on this tile type
         this.game.physics.isoArcade.enable(rock);
@@ -120,67 +121,67 @@ export class Play extends Phaser.State {
       }
     }
 
-    // create a mine object which will be our ending point in the game
-    const mine = this.game.add.isoSprite(400, 400, 0, 'mine', 300, obstacleGroup);
-    mine.anchor.set(0.5);
+    // // create a mine object which will be our ending point in the game
+    // const mine = this.game.add.isoSprite(400, 400, 0, 'mine', 300, obstacleGroup);
+    // mine.anchor.set(0.5);
 
-    this.game.physics.isoArcade.enable(mine);
-    mine.body.collideWorldBounds = true;
-    // mine.body.immovable = true;
-    mine.body.setSize(105, 38, 38, -18, 14, 0);
+    // this.game.physics.isoArcade.enable(mine);
+    // mine.body.collideWorldBounds = true;
+    // // mine.body.immovable = true;
+    // mine.body.setSize(105, 38, 38, -18, 14, 0);
 
     // create collectible items
-    marker = this.game.add.isoSprite(rndNum(800), rndNum(800), 0, 'gold', 0, itemGroup);
-    this.game.physics.isoArcade.enable(marker);
-    marker.body.collideWorldBounds = true;
-    marker.anchor.set(0.5);
+    // marker = this.game.add.isoSprite(rndNum(800), rndNum(800), 0, 'gold', 0, itemGroup);
+    // this.game.physics.isoArcade.enable(marker);
+    // marker.body.collideWorldBounds = true;
+    // marker.anchor.set(0.5);
 
-    marker2 = this.game.add.isoSprite(rndNum(800), rndNum(800), 0, 'revolver', 0, itemGroup);
-    this.game.physics.isoArcade.enable(marker2);
-    marker2.body.collideWorldBounds = true;
-    marker2.anchor.set(0.5);
+    // marker2 = this.game.add.isoSprite(rndNum(800), rndNum(800), 0, 'revolver', 0, itemGroup);
+    // this.game.physics.isoArcade.enable(marker2);
+    // marker2.body.collideWorldBounds = true;
+    // marker2.anchor.set(0.5);
 
-    marker3 = this.game.add.isoSprite(rndNum(800), rndNum(800), 0, 'badge', 0, itemGroup);
-    this.game.physics.isoArcade.enable(marker3);
-    marker3.body.collideWorldBounds = true;
-    marker3.anchor.set(0.5);
+    // marker3 = this.game.add.isoSprite(rndNum(800), rndNum(800), 0, 'badge', 0, itemGroup);
+    // this.game.physics.isoArcade.enable(marker3);
+    // marker3.body.collideWorldBounds = true;
+    // marker3.anchor.set(0.5);
 
-    marker4 = this.game.add.isoSprite(rndNum(800), rndNum(800), 0, 'skull', 0, itemGroup);
-    this.game.physics.isoArcade.enable(marker4);
-    marker4.body.collideWorldBounds = true;
-    marker4.anchor.set(0.5);
+    // marker4 = this.game.add.isoSprite(rndNum(800), rndNum(800), 0, 'skull', 0, itemGroup);
+    // this.game.physics.isoArcade.enable(marker4);
+    // marker4.body.collideWorldBounds = true;
+    // marker4.anchor.set(0.5);
 
-    // create the exit marker next to the mine object
-    exitMarker = this.game.add.isoSprite(830, 194, 0, 'exit', 0, itemGroup);
-    this.game.physics.isoArcade.enable(exitMarker);
-    exitMarker.body.collideWorldBounds = true;
-    exitMarker.anchor.set(0.5);
-    exitMarker.alpha = 0.5;
+    // // create the exit marker next to the mine object
+    // exitMarker = this.game.add.isoSprite(830, 194, 0, 'exit', 0, itemGroup);
+    // this.game.physics.isoArcade.enable(exitMarker);
+    // exitMarker.body.collideWorldBounds = true;
+    // exitMarker.anchor.set(0.5);
+    // exitMarker.alpha = 0.5;
 
 
-    // create the collected item text
-    itemsTxt = this.game.add.text(100, 8, txt, {
-      font: '16px Arial',
-      fill: '#FFFFFF',
-      align: 'center'
-    });
+    // // create the collected item text
+    // itemsTxt = this.game.add.text(100, 8, txt, {
+    //   font: '16px Arial',
+    //   fill: '#FFFFFF',
+    //   align: 'center'
+    // });
 
-    itemsTxt.fixedToCamera = true;
+    // itemsTxt.fixedToCamera = true;
 
-    // create the information text field about the status of the game
-    endTxt = this.game.add.text(0, 8, finalTxt, {
-      font: '18px Arial',
-      fill: '#FFFF00',
-      align: 'center'
-    });
+    // // create the information text field about the status of the game
+    // endTxt = this.game.add.text(0, 8, finalTxt, {
+    //   font: '18px Arial',
+    //   fill: '#FFFF00',
+    //   align: 'center'
+    // });
 
-    endTxt.fixedToCamera = true;
-    endTxt.anchor.x = Math.round(endTxt.width * 0.5) / endTxt.width;
-    endTxt.cameraOffset.x = (width / 3) * 2;
+    // endTxt.fixedToCamera = true;
+    // endTxt.anchor.x = Math.round(endTxt.width * 0.5) / endTxt.width;
+    // endTxt.cameraOffset.x = (width / 3) * 2;
 
-    // update both text fields
-    updateText();
-    updateEndText();
+    // // update both text fields
+    // updateText();
+    // updateEndText();
 
     // Create the player
     player = this.game.add.isoSprite(350, 280, 0, 'characterAnim', 0, obstacleGroup);
@@ -258,10 +259,10 @@ export class Play extends Phaser.State {
 
     this.game.physics.isoArcade.collide(obstacleGroup);
 
-    this.game.physics.isoArcade.overlap(marker, hitBox, (e) => {
-      e.destroy();
-      addItem();
-    });
+    // this.game.physics.isoArcade.overlap(marker, hitBox, (e) => {
+    //   e.destroy();
+    //   addItem();
+    // });
 
     // this.game.physics.isoArcade.overlap(marker2, player, (e) => {
     //   e.destroy();
@@ -287,7 +288,7 @@ export class Play extends Phaser.State {
     //   }
     // });
 
-    endTxt.visible = check;
+    // endTxt.visible = check;
 
     this.game.iso.topologicalSort(obstacleGroup, 2);
   }

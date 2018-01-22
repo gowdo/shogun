@@ -17,6 +17,13 @@ export class Controller {
     this.pad1 = this.game.input.gamepad.pad1;
     this.game.input.gamepad.start();
     this.game.input.gamepad.setDeadZones(0.05);
+    this.buttonADownId = 0;
+
+    // this.pad1.addCallbacks(this, {
+    //   onConnect: () => {
+    //     this.buttonA = this.pad1.getButton(Phaser.Gamepad.XBOX360_A);
+    //   }
+    // });
   }
 
   update() {
@@ -124,10 +131,28 @@ export class Controller {
     this.targetBox.visible = (aimLock && this.targetObj !== null);
 
     if (this.pad1.isDown(Phaser.Gamepad.XBOX360_A)) {
-      this.hitBox.visible = true;
-      this.drawHitBoundsBoxes();
+      const buttonA = this.pad1.getButton(Phaser.Gamepad.XBOX360_A);
+      if (this.buttonADownId !== buttonA.timeDown) {
+        // don't register the hit if the timeDown timestamp is the same as the
+        // same as the last one.
+        // i.e. only register one hit per button press.
+        this.buttonADownId = buttonA.timeDown;
+        this.hitBox.visible = true;
+        const objectHit = this.drawHitBoundsBoxes();
+
+        if (objectHit) {
+          console.log(`${objectHit.key} hit`);
+          objectHit.hitCount++;
+          if (objectHit.hitCount === 3) {
+            objectHit.destroy();
+            this.targetObj = null;
+            this.lockedTargetObj === null;
+          }
+        }
+      }
     } else {
       this.hitBox.visible = false;
+      this.buttonADownId = 0;
     }
   }
 
@@ -146,7 +171,7 @@ export class Controller {
 
       for (let i = 0; i < targets.length; i++) {
         const target = targets[i];
-        if (target.key !== 'characterAnim') {
+        if (target.key === 'rock' && target.key !== 'characterAnim') {
           const offsetXB = target.width / 2;
           const offsetYB = target.height / 2;
           const boundsB = {
@@ -205,6 +230,7 @@ export class Controller {
   }
 
   drawHitBoundsBoxes() {
+    let objectHit = undefined;
     const offsetYA = this.hitBox.height / 2;
     const boundsA = {
       x: this.hitBox.x - offsetYA,
@@ -216,17 +242,22 @@ export class Controller {
       type: 22
     };
     // console.log('a', boundsA);
-    this.game.world.children[3].children.forEach((tree) => {
-      if (tree.key !== 'characterAnim') {
-        const offsetXB = tree.width / 2;
-        const offsetYB = tree.height / 2;
+    const targets = this.game.world.children[3].children;
+    // const playerX = this.player.position.x;
+    // const playerY = this.player.position.y;
+    for (let i = 0; i < targets.length; i++) {
+      const target = targets[i];
+      // this.game.world.children[3].children.forEach((tree) => {
+      if (target.key !== 'characterAnim') {
+        const offsetXB = target.width / 2;
+        const offsetYB = target.height / 2;
         const boundsB = {
-          x: tree.position.x - offsetXB,
-          y: tree.position.y - offsetYB,
-          height: tree.height,
-          width: tree.width,
-          right: tree.position.x + tree.width - offsetXB,
-          bottom: tree.position.y + tree.height - offsetYB,
+          x: target.position.x - offsetXB,
+          y: target.position.y - offsetYB,
+          height: target.height,
+          width: target.width,
+          right: target.position.x + target.width - offsetXB,
+          bottom: target.position.y + target.height - offsetYB,
           type: 22
         };
         if (Phaser.Rectangle.intersects(boundsA, boundsB)) {
@@ -238,10 +269,12 @@ export class Controller {
           }
           this.boundsBoxA = drawBoundsBox(this.game, boundsA, 0x0000FF);
           this.boundsBoxB = drawBoundsBox(this.game, boundsB, 0x0000FF);
-          console.log(`${tree.key} hit`);
+          objectHit = target;
+          break;
         }
       }
-    });
+    }
+    return objectHit;
   }
 }
 
