@@ -138,12 +138,12 @@ export class Controller {
         // i.e. only register one hit per button press.
         this.buttonADownId = buttonA.timeDown;
         this.hitBox.visible = true;
-        const objectHit = this.drawHitBoundsBoxes();
 
+        const objectHit = this.drawHitBoundsBoxes();
         if (objectHit) {
-          console.log(`${objectHit.key} hit`);
+          // console.log(`${objectHit.key} hit`);
           objectHit.hitCount++;
-          if (objectHit.hitCount === 3) {
+          if (objectHit.hitCount === objectHit.hitCountLimit) {
             objectHit.destroy();
             this.targetObj = null;
             this.lockedTargetObj === null;

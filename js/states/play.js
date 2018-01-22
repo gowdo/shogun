@@ -106,6 +106,7 @@ export class Play extends Phaser.State {
         rock = this.game.add.isoSprite(xt + 80, yt + 80, 0, 'rock', 0, obstacleGroup);
         rock.anchor.set(0.5);
         rock.hitCount = 0;
+        rock.hitCountLimit = 5;
 
         // Let the physics engine do its job on this tile type
         this.game.physics.isoArcade.enable(rock);
