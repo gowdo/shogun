@@ -1,22 +1,73 @@
 {
-  "name": "app",
-  "version": "1.0.0",
-  "scripts": {
-    "build": "rm -r build; webpack --config webpack.config.js;"
-  },
-  "devDependencies": {
-    "babel-cli": "^6.24.1",
-    "babel-loader": "^7.1.1",
-    "babel-preset-env": "^1.6.0",
-    "copy-webpack-plugin": "^4.0.1",
-    "css-loader": "^0.28.5",
-    "html-loader": "^0.5.1",
-    "style-loader": "^0.18.2",
-    "svg-inline-loader": "^0.8.0",
-    "expose-loader": "^0.7.3",
-    "webpack": "^3.5.5"
-  },
-  "dependencies": {
-    "phaser-ce": "^2.10.0"
-  }
+    "name": "shogun",
+    "productName": "shogun",
+    "version": "1.0.0",
+    "description": "Shogun game",
+    "main": "./src/index.js",
+    "scripts": {
+        "start": "electron-forge start",
+        "package": "electron-forge package",
+        "make": "electron-forge make",
+        "publish": "electron-forge publish"
+    },
+    "keywords": [
+        "electron",
+        "phaser",
+        "electron-compile"
+    ],
+    "author": "James Gowdy",
+    "license": "MIT",
+    "config": {
+        "forge": {
+            "make_targets": {
+                "win32": [
+                    "squirrel"
+                ],
+                "darwin": [
+                    "zip"
+                ],
+                "linux": [
+                    "flatpak",
+                    "deb"
+                ]
+            },
+            "electronPackagerConfig": {
+                "packageManager": "npm"
+            },
+            "electronWinstallerConfig": {
+                "name": "electron_phaser_forge"
+            },
+            "electronInstallerDebian": {},
+            "electronInstallerFlatpak": {
+                "dest": "out",
+                "icon": "./src/game/assets/images/mushroom2.png",
+                "categories": [
+                    "Games"
+                ]
+            },
+            "github_repository": {
+                "owner": "",
+                "name": ""
+            },
+            "windowsStoreConfig": {
+                "packageName": "",
+                "name": "electronphaserforge"
+            }
+        }
+    },
+    "dependencies": {
+        "dotenv": "^4.0.0",
+        "electron-compile": "^6.4.2",
+        "electron-squirrel-startup": "^1.0.0",
+        "phaser-ce": "^2.10.0"
+    },
+    "devDependencies": {
+        "@types/node": "^8.0.47",
+        "electron": "^1.7.9",
+        "electron-forge": "^4.1.2",
+        "electron-installer-flatpak": "^0.6.0",
+        "electron-prebuilt-compile": "1.7.9",
+        "tslint": "^5.8.0",
+        "typescript": "^2.5.3"
+    }
 }

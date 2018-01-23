@@ -1,2 +1,0 @@
-# shogun
-A Phaser experiment
