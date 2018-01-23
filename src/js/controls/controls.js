@@ -1,7 +1,7 @@
 // const pp = require('polygon-overlap');
 // require('../../node_modules/polygon-overlap/index.js');
 
-import { overlap } from '../utils/polygon_overlap.js';
+import { rotate, getAngleDeg } from '../utils/isometric_utils.js';
 
 export class Controller {
   constructor(game, player, hitBox, viewBox, targetBox) {
@@ -62,8 +62,8 @@ export class Controller {
     let Y = Y_VALUE;
 
     if (aimLock) {
-      X = -(this.player.position.x - this.targetBox.x);
-      Y = -(this.player.position.y - this.targetBox.y);
+      X = -(this.player.position.x - this.targetBox.x());
+      Y = -(this.player.position.y - this.targetBox.y());
     }
 
     const angle = getAngleDeg(X, -Y);
@@ -100,35 +100,32 @@ export class Controller {
 
       const HYP = Math.sqrt((X * X) + (Y * Y));
       const hitScaler = HIT_RADIUS / HYP;
-      this.hitBox.x = this.player.position.x + hitScaler * X;
-      this.hitBox.y = this.player.position.y + hitScaler * Y;
+      this.hitBox.setX(this.player.position.x + hitScaler * X);
+      this.hitBox.setY(this.player.position.y + hitScaler * Y);
 
-      this.viewBox.x = this.player.position.x;
-      this.viewBox.y = this.player.position.y;
-
-      this.viewBox.angle = angle;
+      this.viewBox.setX(this.player.position.x);
+      this.viewBox.setY(this.player.position.y);
+      this.viewBox.setAngle(angle);
 
       if (aimLock === false) {
         // if no aim lock, move the targetBox
         const targetScaler = TARGET_RADIUS / HYP;
-        this.targetBox.x = this.player.position.x + targetScaler * X;
-        this.targetBox.y = this.player.position.y + targetScaler * Y;
-        // this.targetBox.x = this.player.position.x + X * 100;
-        // this.targetBox.y = this.player.position.y + Y * 100;
+        this.targetBox.setX(this.player.position.x + targetScaler * X);
+        this.targetBox.setY(this.player.position.y + targetScaler * Y);
       }
     }
 
     if (aimLock && this.targetObj !== null) {
       this.lockedTargetObj = this.targetObj;
-      this.targetBox.x = this.targetObj.position.x;
-      this.targetBox.y = this.targetObj.position.y;
+      this.targetBox.setX(this.targetObj.position.x);
+      this.targetBox.setY(this.targetObj.position.y);
     } else {
       this.lockedTargetObj = null;
     }
 
     this.drawTargetBoundsBoxes();
 
-    this.targetBox.visible = (aimLock && this.targetObj !== null);
+    this.targetBox.setVisible(aimLock && this.targetObj !== null);
 
     if (this.pad1.isDown(Phaser.Gamepad.XBOX360_A)) {
       const buttonA = this.pad1.getButton(Phaser.Gamepad.XBOX360_A);
@@ -137,7 +134,7 @@ export class Controller {
         // same as the last one.
         // i.e. only register one hit per button press.
         this.buttonADownId = buttonA.timeDown;
-        this.hitBox.visible = true;
+        this.hitBox.setVisible(true);
 
         const objectHit = this.drawHitBoundsBoxes();
         if (objectHit) {
@@ -151,7 +148,7 @@ export class Controller {
         }
       }
     } else {
-      this.hitBox.visible = false;
+      this.hitBox.setVisible(false);
       this.buttonADownId = 0;
     }
   }
@@ -183,7 +180,7 @@ export class Controller {
             bottom: target.position.y + target.height - offsetYB
           };
 
-          if (inView(this.viewBox, boundsB)) {
+          if (this.viewBox.inView(boundsB)) {
             const xDiff = (target.position.x > playerX) ? target.position.x - playerX : playerX - target.position.x;
             const yDiff = (target.position.y > playerY) ? target.position.y - playerY : playerY - target.position.y;
             const diff = xDiff + yDiff;
@@ -231,14 +228,14 @@ export class Controller {
 
   drawHitBoundsBoxes() {
     let objectHit = undefined;
-    const offsetYA = this.hitBox.height / 2;
+    const offsetYA = this.hitBox.height() / 2;
     const boundsA = {
-      x: this.hitBox.x - offsetYA,
-      y: this.hitBox.y - offsetYA,
-      height: this.hitBox.height,
-      width: this.hitBox.width,
-      right: this.hitBox.x + this.hitBox.width - offsetYA,
-      bottom: this.hitBox.y + this.hitBox.height - offsetYA,
+      x: this.hitBox.x() - offsetYA,
+      y: this.hitBox.y() - offsetYA,
+      height: this.hitBox.height(),
+      width: this.hitBox.width(),
+      right: this.hitBox.right() - offsetYA,
+      bottom: this.hitBox.bottom() - offsetYA,
       type: 22
     };
     // console.log('a', boundsA);
@@ -278,35 +275,6 @@ export class Controller {
   }
 }
 
-function rotate(cx, cy, x, y, angle) {
-  const radians = (Math.PI / 180) * angle,
-    cos = Math.cos(radians),
-    sin = Math.sin(radians),
-    nx = (cos * (x - cx)) + (sin * (y - cy)) + cx,
-    ny = (cos * (y - cy)) - (sin * (x - cx)) + cy;
-  return [nx, ny];
-}
-
-function getAngleDeg(x, y) {
-  const angleRad = Math.atan(x / y);
-  const angDeg = toDegrees(angleRad);
-  if (y <= 0) {
-    return 180 + angDeg;
-  } else if (x <= 0) {
-    return 360 + angDeg;
-  } else {
-    return angDeg;
-  }
-}
-
-function toDegrees(angle) {
-  return angle * (180 / Math.PI);
-}
-
-function toRadians(angle) {
-  return angle * (Math.PI / 180);
-}
-
 function drawBoundsBox(game, bounds, color) {
   const hitBox = game.add.graphics(0, 0);
   hitBox.anchor.set(0);
@@ -320,22 +288,3 @@ function drawBoundsBox(game, bounds, color) {
   return hitBox;
 }
 
-function inView(viewBox, targetBounds) {
-  const b1 = [];
-  const points = viewBox.graphicsData[0].shape.points;
-  for (let i = 0; i < points.length; i+=2) {
-    const p = rotate(0,0, points[i], points[i+1], viewBox.angle);
-    b1.push([
-      -p[0] + viewBox.position.x,
-      p[1] + viewBox.position.y
-    ]);
-  }
-
-  const b2 = [
-    [targetBounds.x, targetBounds.y],
-    [targetBounds.right, targetBounds.y],
-    [targetBounds.right, targetBounds.bottom],
-    [targetBounds.x, targetBounds.bottom],
-  ];
-  return overlap(b1, b2);
-}

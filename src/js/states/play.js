@@ -1,6 +1,9 @@
 import { Controller } from '../controls/controls.js';
+import { ViewBox, TargetBox, HitBox } from '../elements/boxes/index.js';
+// import { ViewBox } from '../elements/boxes/view_box.js';
 const width = window.innerWidth;
 // const height = window.innerHeight;
+import { rotateXY, getAngleDeg } from '../utils/isometric_utils.js';
 
 let obstacleGroup;
 let player;
@@ -199,53 +202,9 @@ export class Play extends Phaser.State {
     player.alpha = 0.6;
     player.anchor.set(0.5);
 
-    const hitBox = this.game.add.graphics(0, 0);
-    // hitBox.anchor.set(0.5);
-    // hitBox.beginFill(0xFF3300);
-    // hitBox.lineStyle(0, 0xffd900, 1);
-    // hitBox.moveTo(...convertIsoArray(0, 0));
-    // hitBox.lineTo(...convertIsoArray(50, 0));
-    // hitBox.lineTo(...convertIsoArray(50, 50));
-    // hitBox.lineTo(...convertIsoArray(0, 50));
-    // hitBox.lineTo(...convertIsoArray(0, 0));
-    // hitBox.endFill();
-    hitBox.beginFill(0x0000FF, 1);
-    hitBox.drawCircle(0, 0, 10);
-
-    const viewBox = this.game.add.graphics(0, 0);
-    viewBox.anchor.set(0.5);
-    viewBox.beginFill(0xFFFFFF);
-    viewBox.lineStyle(0, 0xffd900, 1);
-    // viewBox.moveTo(...convertIsoArray(0, 0));
-    // viewBox.lineTo(...convertIsoArray(200, -40));
-    // viewBox.lineTo(...convertIsoArray(200, 40));
-    // viewBox.lineTo(...convertIsoArray(0, 0));
-    viewBox.moveTo(0, 0);
-    viewBox.lineTo(100, -600);
-    viewBox.lineTo(-100, -600);
-    viewBox.lineTo(0, 0);
-    viewBox.alpha = 0;
-
-    viewBox.endFill();
-
-    const targetBox = this.game.add.graphics(0, 0);
-    // targetBox.anchor.set(0.5);
-    // targetBox.beginFill(0xFFFFFF);
-    // targetBox.lineStyle(0, 0xffd900, 1);
-    // targetBox.moveTo(...convertIsoArray(0, 0));
-    // targetBox.lineTo(...convertIsoArray(10, 0));
-    // targetBox.lineTo(...convertIsoArray(10, 10));
-    // targetBox.lineTo(...convertIsoArray(0, 10));
-    // targetBox.lineTo(...convertIsoArray(0, 0));
-    // targetBox.endFill();
-    targetBox.beginFill(0xFFFFFF, 1);
-    targetBox.drawCircle(0, 0, 10);
-
-    // this.game.physics.isoArcade.enable(hitBox);
-    // hitBox.body.collideWorldBounds = true;
-    // hitBox.anchor.set(0.5);
-    // hitBox.body.immovable = true;
-
+    const hitBox = new HitBox(this.game);
+    const viewBox = new ViewBox(this.game);
+    const targetBox = new TargetBox(this.game);
     controller = new Controller(this.game, player, hitBox, viewBox, targetBox);
 
     // enable physics on the player
@@ -334,23 +293,4 @@ function updateEndText(_t) {
   }
 
   endTxt.setText(finalTxt);
-}
-
-function rotateXY(latitude, longitude) {
-  // return { x: 180 - longitude, y: latitude + 90 };
-  return { x: longitude, y: latitude};
-}
-
-function convertIso(x, y) {
-  const m = Math.sin(Math.PI / 6);
-  return {
-    x: (x * m - y * m),
-    y: (x + y)
-  };
-}
-
-function convertIsoArray(x1, y1) {
-  const { x, y } = convertIso(x1, y1);
-  const r = rotateXY(x, y);
-  return [r.x, r.y];
 }

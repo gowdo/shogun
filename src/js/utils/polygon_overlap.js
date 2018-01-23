@@ -1,10 +1,6 @@
-"use strict";
-
-// var intersect = require("lines-intersect");
-// var inside = require("point-inside-polygon");
 
 function inside(p, poly) {
-  var i, j, c = false, nvert = poly.length;
+  let i, j, c = false, nvert = poly.length;
   for (i = 0, j = nvert - 1; i < nvert; j = i++) {
     if (((poly[i][1] > p[1]) !== (poly[j][1] > p[1])) &&
       (p[0] < (poly[j][0] - poly[i][0]) * (p[1] - poly[i][1]) / (poly[j][1] - poly[i][1]) + poly[i][0])) {
@@ -20,16 +16,16 @@ function on_seg(xi, yi, xj, yj, xk, yk) {
 }
 
 function dir(xi, yi, xj, yj, xk, yk) {
-  var a = (xk - xi) * (yj - yi);
-  var b = (xj - xi) * (yk - yi);
+  let a = (xk - xi) * (yj - yi);
+  let b = (xj - xi) * (yk - yi);
   return a < b ? -1 : a > b ? 1 : 0;
 }
 
 function intersect(x1, y1, x2, y2, x3, y3, x4, y4) {
-  var d1 = dir(x3, y3, x4, y4, x1, y1);
-  var d2 = dir(x3, y3, x4, y4, x2, y2);
-  var d3 = dir(x1, y1, x2, y2, x3, y3);
-  var d4 = dir(x1, y1, x2, y2, x4, y4);
+  let d1 = dir(x3, y3, x4, y4, x1, y1);
+  let d2 = dir(x3, y3, x4, y4, x2, y2);
+  let d3 = dir(x1, y1, x2, y2, x3, y3);
+  let d4 = dir(x1, y1, x2, y2, x4, y4);
   return (((d1 > 0 && d2 < 0) || (d1 < 0 && d2 > 0)) &&
     ((d3 > 0 && d4 < 0) || (d3 < 0 && d4 > 0))) ||
     (d1 === 0 && on_seg(x3, y3, x4, y4, x1, y1)) ||
@@ -39,7 +35,7 @@ function intersect(x1, y1, x2, y2, x3, y3, x4, y4) {
 }
 
 function polygon_points_inside(p0, p1) {
-  var i;
+  let i;
   for (i = 0; i < p0.length; i += 1) {
     if (inside(p0[i], p1)) {
       return true;
@@ -54,8 +50,8 @@ function polygon_points_inside(p0, p1) {
 }
 
 function polygon_edges_overlap(p0, p1) {
-  for (var i = 0; i < p0.length - 1; i += 1) {
-    for (var j = 0; j < p1.length - 1; j += 1) {
+  for (let i = 0; i < p0.length - 1; i += 1) {
+    for (let j = 0; j < p1.length - 1; j += 1) {
       if (intersect(p0[i][0], p0[i][1], p0[i + 1][0], p0[i + 1][1],
         p1[j][0], p1[j][1], p1[j + 1][0], p1[j + 1][1])) {
         return true;
