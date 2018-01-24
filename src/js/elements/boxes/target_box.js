@@ -1,8 +1,8 @@
 import { Shape } from './shape.js';
 
 export class TargetBox extends Shape {
-  constructor(game) {
-    super(game);
+  constructor(game, group) {
+    super(game, group);
     this.shape.beginFill(0xFFFFFF, 1);
     this.shape.drawCircle(0, 0, 10);
     this.shape.endFill();

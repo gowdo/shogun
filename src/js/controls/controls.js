@@ -4,12 +4,13 @@
 import { rotate, getAngleDeg } from '../utils/isometric_utils.js';
 
 export class Controller {
-  constructor(game, player, hitBox, viewBox, targetBox) {
+  constructor(game, player, hitBox, viewBox, targetBox, bloodGroup) {
     this.game = game;
     this.player = player;
     this.hitBox = hitBox;
-    this.targetBox = targetBox;
     this.viewBox = viewBox;
+    this.targetBox = targetBox;
+    this.bloodGroup = bloodGroup;
     this.boundsBoxA;
     this.boundsBoxB;
     this.targetObj = null;
@@ -136,10 +137,14 @@ export class Controller {
         this.buttonADownId = buttonA.timeDown;
         this.hitBox.setVisible(true);
 
-        const objectHit = this.drawHitBoundsBoxes();
+        const objectHit = this.drawHitBoundsBox();
         if (objectHit) {
           // console.log(`${objectHit.key} hit`);
           objectHit.hitCount++;
+          this.drawBlood(objectHit);
+          objectHit.isBleeding = true;
+          objectHit.bleedingCounter = 500;
+
           if (objectHit.hitCount === objectHit.hitCountLimit) {
             objectHit.destroy();
             this.targetObj = null;
@@ -151,6 +156,25 @@ export class Controller {
       this.hitBox.setVisible(false);
       this.buttonADownId = 0;
     }
+
+    const rocks = this.game.world.children[4].children;
+    for (let i = 0; i < rocks.length; i++) {
+      const rock = rocks[i];
+      if (rock.key === 'rock') {
+        if (rock.isBleeding) {
+          const oldPos = rock.previousPosition.x * rock.previousPosition.y;
+          const newPos = rock.position.x * rock.position.y;
+          if (oldPos !== newPos) {
+            rock.bleedingCounter--;
+            if (rock.bleedingCounter) {
+              this.drawBlood(rock, true);
+            } else {
+              rock.isBleeding = false;
+            }
+          }
+        }
+      }
+    }
   }
 
   drawTargetBoundsBoxes() {
@@ -161,7 +185,7 @@ export class Controller {
 
     if (this.lockedTargetObj === null) {
       // if there is no locked target, find the targetable object
-      const targets = this.game.world.children[3].children;
+      const targets = this.game.world.children[4].children;
       const playerX = this.player.position.x;
       const playerY = this.player.position.y;
       let closestTargetDistance = Number.MAX_SAFE_INTEGER;
@@ -226,8 +250,7 @@ export class Controller {
     }
   }
 
-  drawHitBoundsBoxes() {
-    let objectHit = undefined;
+  drawHitBoundsBox() {
     const offsetYA = this.hitBox.height() / 2;
     const boundsA = {
       x: this.hitBox.x() - offsetYA,
@@ -238,14 +261,11 @@ export class Controller {
       bottom: this.hitBox.bottom() - offsetYA,
       type: 22
     };
-    // console.log('a', boundsA);
-    const targets = this.game.world.children[3].children;
-    // const playerX = this.player.position.x;
-    // const playerY = this.player.position.y;
+
+    const targets = this.game.world.children[4].children;
     for (let i = 0; i < targets.length; i++) {
       const target = targets[i];
-      // this.game.world.children[3].children.forEach((tree) => {
-      if (target.key !== 'characterAnim') {
+      if (target.key === 'rock' && target.key !== 'characterAnim') {
         const offsetXB = target.width / 2;
         const offsetYB = target.height / 2;
         const boundsB = {
@@ -266,12 +286,38 @@ export class Controller {
           }
           this.boundsBoxA = drawBoundsBox(this.game, boundsA, 0x0000FF);
           this.boundsBoxB = drawBoundsBox(this.game, boundsB, 0x0000FF);
-          objectHit = target;
-          break;
+          return target;
         }
       }
     }
-    return objectHit;
+  }
+
+  drawBlood(target, small) {
+    const dropCount = small ? 1.2 : 30;
+
+    const game  = this.game;
+    const bloodGroup  = this.bloodGroup;
+    let count = Math.ceil(dropCount * Math.random());
+
+    function splat() {
+      count--;
+      if (count) {
+        setTimeout(() => {
+          const spread = small ? 20 : 80;
+          const x = target.position.x -  (Math.random() * spread) + spread / 2;
+          const y = target.position.y - (Math.random() * spread) + spread / 2;
+          const r = Math.random() * 5;
+          const drop = game.add.graphics(x, y);
+          drop.anchor.set(0);
+          drop.beginFill(0xB90000, 1);
+          drop.drawEllipse(0, 0, r * 2, r);
+          drop.endFill();
+          bloodGroup.add(drop);
+          splat();
+        }, 5);
+      }
+    }
+    splat();
   }
 }
 

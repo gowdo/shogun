@@ -3,8 +3,8 @@ import { overlap } from '../../utils/polygon_overlap.js';
 import { Shape } from './shape.js';
 
 export class ViewBox extends Shape {
-  constructor(game) {
-    super(game);
+  constructor(game, group) {
+    super(game, group);
     this.shape.beginFill(0xFFFFFF);
     this.shape.lineStyle(0, 0xffd900, 1);
     this.shape.moveTo(0, 0);

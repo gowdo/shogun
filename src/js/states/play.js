@@ -6,6 +6,8 @@ const width = window.innerWidth;
 import { rotateXY, getAngleDeg } from '../utils/isometric_utils.js';
 
 let obstacleGroup;
+let bloodGroup;
+let shapesGroup;
 let player;
 let marker, marker2, marker3, marker4, itemGroup;
 let floorGroup;
@@ -37,7 +39,9 @@ export class Play extends Phaser.State {
     floorGroup = this.game.add.group();
     itemGroup = this.game.add.group();
     grassGroup = this.game.add.group();
+    bloodGroup = this.game.add.group();
     obstacleGroup = this.game.add.group();
+    shapesGroup = this.game.add.group();
 
     // set the gravity in our game
     this.game.physics.isoArcade.gravity.setTo(0, 0, -500);
@@ -109,7 +113,7 @@ export class Play extends Phaser.State {
         rock = this.game.add.isoSprite(xt + 80, yt + 80, 0, 'rock', 0, obstacleGroup);
         rock.anchor.set(0.5);
         rock.hitCount = 0;
-        rock.hitCountLimit = 5;
+        rock.hitCountLimit = 10;
 
         // Let the physics engine do its job on this tile type
         this.game.physics.isoArcade.enable(rock);
@@ -122,6 +126,8 @@ export class Play extends Phaser.State {
 
         // set the slow down rate on each axis (X, Y, Z)
         rock.body.drag.set(100, 100, 0);
+
+        rock.isBleeding = false;
       }
     }
 
@@ -202,10 +208,10 @@ export class Play extends Phaser.State {
     player.alpha = 0.6;
     player.anchor.set(0.5);
 
-    const hitBox = new HitBox(this.game);
-    const viewBox = new ViewBox(this.game);
-    const targetBox = new TargetBox(this.game);
-    controller = new Controller(this.game, player, hitBox, viewBox, targetBox);
+    const hitBox = new HitBox(this.game, shapesGroup);
+    const viewBox = new ViewBox(this.game, shapesGroup);
+    const targetBox = new TargetBox(this.game, shapesGroup);
+    controller = new Controller(this.game, player, hitBox, viewBox, targetBox, bloodGroup);
 
     // enable physics on the player
     this.game.physics.isoArcade.enable(player);

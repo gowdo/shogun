@@ -1,8 +1,11 @@
 export class Shape {
-  constructor(game) {
+  constructor(game, group) {
     this.game = game;
     this.shape = this.game.add.graphics(0, 0);
     this.shape.anchor.set(0.5);
+    if (group) {
+      group.add(this.shape);
+    }
   }
 
   x() {
