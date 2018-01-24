@@ -49,7 +49,8 @@ export class Boot extends Phaser.State {
     this.game.load.image('SW', 'img/controls/SW.png');
     this.game.load.image('W', 'img/controls/W.png');
 
-    this.game.load.spritesheet('characterAnim', 'img/tiles/characterAnim.png', 70, 74);
+    // this.game.load.spritesheet('characterAnim', 'img/tiles/characterAnim.png', 70, 74);
+    this.game.load.spritesheet('characterAnim', 'img/tiles/walk_00000.png', 148, 144);
   }
 
   create() {
