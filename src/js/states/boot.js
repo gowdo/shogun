@@ -1,5 +1,10 @@
 
 const SIZE = 1024;
+// should really be 0.5 for a classic 2:1 iso ratio
+// but the scanned isometric paper bought from amazon seems to be slightly off.
+// either that or the scanner is off.
+// this ratio is made from trial an error looking at the screen, lining things up
+const ISO_RATIO = 0.586;
 
 export class Boot extends Phaser.State {
 
@@ -36,7 +41,7 @@ export class Boot extends Phaser.State {
     this.game.load.image('grass2', 'img/tiles/ground_tile_grass2.png');
     this.game.load.image('grass3', 'img/tiles/ground_tile_grass3.png');
 
-    this.game.load.image('mine', 'img/cube_triple.png');
+    this.game.load.image('mine', 'img/www.png');
     this.game.load.image('hitBox', 'img/cube.png');
     // this.game.load.image('mine', 'img/tiles/mine.png');
 
@@ -59,6 +64,7 @@ export class Boot extends Phaser.State {
 
     // Add the Isometric plug-in to Phaser
     this.game.plugins.add(new Phaser.Plugin.Isometric(this.game));
+    this.game.iso.projectionAngle = Math.atan(ISO_RATIO);
 
     // Set the world size
     this.game.world.setBounds(0, 0, SIZE * 2, SIZE);

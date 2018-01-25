@@ -132,12 +132,12 @@ export class Play extends Phaser.State {
     }
 
     // // create a mine object which will be our ending point in the game
-    // const mine = this.game.add.isoSprite(400, 400, 0, 'mine', 300, obstacleGroup);
-    // mine.anchor.set(0.5);
+    const mine = this.game.add.isoSprite(400, 400, 0, 'mine', 300, obstacleGroup);
+    mine.anchor.set(0.5);
 
-    // this.game.physics.isoArcade.enable(mine);
-    // mine.body.collideWorldBounds = true;
-    // // mine.body.immovable = true;
+    this.game.physics.isoArcade.enable(mine);
+    mine.body.collideWorldBounds = true;
+    // mine.body.immovable = true;
     // mine.body.setSize(105, 38, 38, -18, 14, 0);
 
     // create collectible items
