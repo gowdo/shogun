@@ -9,7 +9,7 @@
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
-    "server": "http-server --silent src/"
+    "server": "http-server src/ --silent"
   },
   "keywords": [
     "electron",
