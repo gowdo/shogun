@@ -33,7 +33,8 @@ export class Play extends Phaser.State {
   create() {
 
     // set the Background color of our game
-    this.game.stage.backgroundColor = '0xde6712';
+    this.game.stage.backgroundColor = '0xBBBBBB';
+    // this.game.stage.backgroundColor = '0xde6712';
 
     // create groups for different tiles
     floorGroup = this.game.add.group();
@@ -113,7 +114,7 @@ export class Play extends Phaser.State {
         rock = this.game.add.isoSprite(xt + 80, yt + 80, 0, 'rock', 0, obstacleGroup);
         rock.anchor.set(0.5);
         rock.hitCount = 0;
-        rock.hitCountLimit = 10;
+        rock.hitCountLimit = 50;
 
         // Let the physics engine do its job on this tile type
         this.game.physics.isoArcade.enable(rock);
@@ -131,12 +132,12 @@ export class Play extends Phaser.State {
       }
     }
 
-    // // create a mine object which will be our ending point in the game
-    const mine = this.game.add.isoSprite(400, 400, 0, 'mine', 300, obstacleGroup);
-    mine.anchor.set(0.5);
+    // create a mine object which will be our ending point in the game
+    // const mine = this.game.add.isoSprite(400, 400, 0, 'mine', 300, obstacleGroup);
+    // mine.anchor.set(0.5);
 
-    this.game.physics.isoArcade.enable(mine);
-    mine.body.collideWorldBounds = true;
+    // this.game.physics.isoArcade.enable(mine);
+    // mine.body.collideWorldBounds = true;
     // mine.body.immovable = true;
     // mine.body.setSize(105, 38, 38, -18, 14, 0);
 
@@ -196,24 +197,24 @@ export class Play extends Phaser.State {
     // Create the player
     player = this.game.add.isoSprite(350, 280, 0, 'characterAnim', 0, obstacleGroup);
 
-    player.animations.add('SE',[0,  1,  2,  3,  4,  5,  6,  7,  8,  9], 10, true);
-    player.animations.add('E', [10, 11, 12, 13, 14, 15, 16, 17, 18, 19], 10, true);
-    player.animations.add('NE',[20, 21, 22, 23, 24, 25, 26, 27, 28, 29], 10, true);
-    player.animations.add('N', [30, 31, 32, 33, 34, 35, 36, 37, 38, 39], 10, true);
-    player.animations.add('NW',[40, 41, 42, 43, 44, 45, 46, 47, 48, 49], 10, true);
-    player.animations.add('W', [50, 51, 52, 53, 54, 55, 56, 57, 58, 59], 10, true);
-    player.animations.add('SW',[60, 61, 62, 63, 64, 65, 66, 67, 68, 69], 10, true);
-    player.animations.add('S', [70, 71, 72, 73, 74, 75, 76, 77, 78, 79], 10, true);
+    // player.animations.add('SE',[0,  1,  2,  3,  4,  5,  6,  7,  8,  9], 10, true);
+    // player.animations.add('E', [10, 11, 12, 13, 14, 15, 16, 17, 18, 19], 10, true);
+    // player.animations.add('NE',[20, 21, 22, 23, 24, 25, 26, 27, 28, 29], 10, true);
+    // player.animations.add('N', [30, 31, 32, 33, 34, 35, 36, 37, 38, 39], 10, true);
+    // player.animations.add('NW',[40, 41, 42, 43, 44, 45, 46, 47, 48, 49], 10, true);
+    // player.animations.add('W', [50, 51, 52, 53, 54, 55, 56, 57, 58, 59], 10, true);
+    // player.animations.add('SW',[60, 61, 62, 63, 64, 65, 66, 67, 68, 69], 10, true);
+    // player.animations.add('S', [70, 71, 72, 73, 74, 75, 76, 77, 78, 79], 10, true);
 
     // ghost
-    // player.animations.add('S', [0, 1, 2, 3, 4, 5, 6, 7], 10, true);
-    // player.animations.add('SW', [8, 9, 10, 11, 12, 13, 14, 15], 10, true);
-    // player.animations.add('W', [16, 17, 18, 19, 20, 21, 22, 23], 10, true);
-    // player.animations.add('NW', [24, 25, 26, 27, 28, 29, 30, 31], 10, true);
-    // player.animations.add('N', [32, 33, 34, 35, 36, 37, 38, 39], 10, true);
-    // player.animations.add('NE', [40, 41, 42, 43, 44, 45, 46, 47], 10, true);
-    // player.animations.add('E', [48, 49, 50, 51, 52, 53, 54, 55], 10, true);
-    // player.animations.add('SE', [56, 57, 58, 59, 60, 61, 62, 63], 10, true);
+    player.animations.add('S', [0, 1, 2, 3, 4, 5, 6, 7], 10, true);
+    player.animations.add('SW', [8, 9, 10, 11, 12, 13, 14, 15], 10, true);
+    player.animations.add('W', [16, 17, 18, 19, 20, 21, 22, 23], 10, true);
+    player.animations.add('NW', [24, 25, 26, 27, 28, 29, 30, 31], 10, true);
+    player.animations.add('N', [32, 33, 34, 35, 36, 37, 38, 39], 10, true);
+    player.animations.add('NE', [40, 41, 42, 43, 44, 45, 46, 47], 10, true);
+    player.animations.add('E', [48, 49, 50, 51, 52, 53, 54, 55], 10, true);
+    player.animations.add('SE', [56, 57, 58, 59, 60, 61, 62, 63], 10, true);
 
     // player.alpha = 0.6;
     player.anchor.set(0.5);

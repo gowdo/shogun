@@ -4,7 +4,7 @@ const SIZE = 1024;
 // but the scanned isometric paper bought from amazon seems to be slightly off.
 // either that or the scanner is off.
 // this ratio is made from trial an error looking at the screen, lining things up
-const ISO_RATIO = 0.586;
+const ISO_RATIO = 0.58;
 
 export class Boot extends Phaser.State {
 
@@ -42,6 +42,7 @@ export class Boot extends Phaser.State {
     this.game.load.image('grass3', 'img/tiles/ground_tile_grass3.png');
 
     this.game.load.image('mine', 'img/www.png');
+    this.game.load.image('back', 'img/www.png');
     this.game.load.image('hitBox', 'img/cube.png');
     // this.game.load.image('mine', 'img/tiles/mine.png');
 
@@ -54,9 +55,9 @@ export class Boot extends Phaser.State {
     this.game.load.image('SW', 'img/controls/SW.png');
     this.game.load.image('W', 'img/controls/W.png');
 
-    this.game.load.spritesheet('characterAnim', 'img/tiles/walk_00000.png', 70, 144);
+    // this.game.load.spritesheet('characterAnim', 'img/tiles/walk_00000.png', 70, 144);
     // ghost
-    // this.game.load.spritesheet('characterAnim', 'img/tiles/characterAnim.png', 70, 74);
+    this.game.load.spritesheet('characterAnim', 'img/tiles/characterAnim.png', 70, 74);
   }
 
   create() {

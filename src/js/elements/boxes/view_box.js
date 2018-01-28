@@ -22,8 +22,8 @@ export class ViewBox extends Shape {
     for (let i = 0; i < this.points.length; i+=2) {
       const p = rotate(0,0, this.points[i], this.points[i+1], this.shape.angle);
       b1.push([
-        -p[0] + this.shape.position.x,
-        p[1] + this.shape.position.y
+        -p.x + this.shape.position.x,
+        p.y + this.shape.position.y
       ]);
     }
 
