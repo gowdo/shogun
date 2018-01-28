@@ -1,7 +1,7 @@
 // const pp = require('polygon-overlap');
 // require('../../node_modules/polygon-overlap/index.js');
 
-import { rotate, getAngleDeg, middlePoint } from '../utils/isometric_utils.js';
+import { rotate, getAngleDeg } from '../utils/isometric_utils.js';
 
 export class Controller {
   constructor(game, player, hitBox, viewBox, targetBox, bloodGroup) {
