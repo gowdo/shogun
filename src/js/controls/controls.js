@@ -2,6 +2,7 @@
 // require('../../node_modules/polygon-overlap/index.js');
 
 import { rotate, getAngleDeg } from '../utils/isometric_utils.js';
+import { Blood } from './blood.js';
 
 export class Controller {
   constructor(game, player, hitBox, viewBox, targetBox, bloodGroup) {
@@ -10,7 +11,6 @@ export class Controller {
     this.hitBox = hitBox;
     this.viewBox = viewBox;
     this.targetBox = targetBox;
-    this.bloodGroup = bloodGroup;
     this.boundsBoxA;
     this.boundsBoxB;
     this.targetObj = null;
@@ -18,13 +18,11 @@ export class Controller {
     this.pad1 = this.game.input.gamepad.pad1;
     this.game.input.gamepad.start();
     this.game.input.gamepad.setDeadZones(0.05);
-    this.buttonADownId = 0;
+    this.hitButtonDownId = 0;
+    this.dodgeButtonDownId = 0;
+    this.dodgeDuration = 0;
 
-    // this.pad1.addCallbacks(this, {
-    //   onConnect: () => {
-    //     this.buttonA = this.pad1.getButton(Phaser.Gamepad.XBOX360_A);
-    //   }
-    // });
+    this.blood = new Blood(game, player, bloodGroup);
   }
 
   update() {
@@ -34,30 +32,40 @@ export class Controller {
     let Y_VALUE = 0;
     let X_VALUE = 0;
 
-    if (this.pad1.axis(Phaser.Gamepad.XBOX360_STICK_LEFT_X) < -0.01) {
-      X_VALUE = this.pad1.axis(Phaser.Gamepad.XBOX360_STICK_LEFT_X);
-    } else if (this.pad1.axis(Phaser.Gamepad.XBOX360_STICK_LEFT_X) > 0.01) {
-      X_VALUE = this.pad1.axis(Phaser.Gamepad.XBOX360_STICK_LEFT_X);
+    if (this.pad1.axis(Phaser.Gamepad.PS3XC_STICK_LEFT_X) < -0.01) {
+      X_VALUE = this.pad1.axis(Phaser.Gamepad.PS3XC_STICK_LEFT_X);
+    } else if (this.pad1.axis(Phaser.Gamepad.PS3XC_STICK_LEFT_X) > 0.01) {
+      X_VALUE = this.pad1.axis(Phaser.Gamepad.PS3XC_STICK_LEFT_X);
     }
 
-    if (this.pad1.axis(Phaser.Gamepad.XBOX360_STICK_LEFT_Y) < -0.01) {
-      Y_VALUE = this.pad1.axis(Phaser.Gamepad.XBOX360_STICK_LEFT_Y);
-    } else if (this.pad1.axis(Phaser.Gamepad.XBOX360_STICK_LEFT_Y) > 0.01) {
-      Y_VALUE = this.pad1.axis(Phaser.Gamepad.XBOX360_STICK_LEFT_Y);
+    if (this.pad1.axis(Phaser.Gamepad.PS3XC_STICK_LEFT_Y) < -0.01) {
+      Y_VALUE = this.pad1.axis(Phaser.Gamepad.PS3XC_STICK_LEFT_Y);
+    } else if (this.pad1.axis(Phaser.Gamepad.PS3XC_STICK_LEFT_Y) > 0.01) {
+      Y_VALUE = this.pad1.axis(Phaser.Gamepad.PS3XC_STICK_LEFT_Y);
     }
 
+    const aimLock = this.pad1.isDown(Phaser.Gamepad.XBOX360_LEFT_BUMPER);
 
     const SPEED = 170;
     const HIT_RADIUS = 50;
     const TARGET_RADIUS = 100;
+    let speedBonus = 1;
+    if (this.dodgeDuration !== 0) {
+      this.dodgeDuration--;
+      if (aimLock) {
+        speedBonus += 5;
+      }
+    }
+
+    if (this.hitDuration !== 0) {
+      this.hitDuration--;
+      this.drawSword();
+    }
 
     // move player
     const newPoints = rotate(0, 0, X_VALUE, Y_VALUE, 45);
-    this.player.body.velocity.x = newPoints.x * SPEED;
-    this.player.body.velocity.y = newPoints.y * SPEED;
-
-    const aimLock = this.pad1.isDown(Phaser.Gamepad.XBOX360_LEFT_BUMPER);
-    const moving = (X_VALUE !== 0 || Y_VALUE !== 0);
+    this.player.body.velocity.x = newPoints.x * (SPEED * speedBonus);
+    this.player.body.velocity.y = newPoints.y * (SPEED * speedBonus);
 
     let X = X_VALUE;
     let Y = Y_VALUE;
@@ -97,7 +105,8 @@ export class Controller {
       this.player.animations.stop();
     }
 
-    if (moving) {
+    const isMoving = (X_VALUE !== 0 || Y_VALUE !== 0);
+    if (isMoving) {
 
       const HYP = Math.sqrt((X * X) + (Y * Y));
       const hitScaler = HIT_RADIUS / HYP;
@@ -128,21 +137,23 @@ export class Controller {
 
     this.targetBox.setVisible(aimLock && this.targetObj !== null);
 
-    if (this.pad1.isDown(Phaser.Gamepad.XBOX360_A)) {
-      const buttonA = this.pad1.getButton(Phaser.Gamepad.XBOX360_A);
-      if (this.buttonADownId !== buttonA.timeDown) {
+    // hit button pressed
+    if (this.pad1.isDown(Phaser.Gamepad.PS3XC_X)) {
+      const hitButton = this.pad1.getButton(Phaser.Gamepad.PS3XC_X);
+      if (this.hitButtonDownId !== hitButton.timeDown) {
         // don't register the hit if the timeDown timestamp is the same as the
         // same as the last one.
         // i.e. only register one hit per button press.
-        this.buttonADownId = buttonA.timeDown;
+        this.hitButtonDownId = hitButton.timeDown;
+        this.hitDuration = 3;
         this.hitBox.setVisible(true);
 
         const objectHit = this.drawHitBoundsBox();
         if (objectHit) {
           // console.log(`${objectHit.key} hit`);
           objectHit.hitCount++;
-          // this.drawBlood({ x: objectHit.x, y: objectHit.y }, 30, 5, 80);
-          this.spray(objectHit);
+          // this.blood.drawBlood({ x: objectHit.x, y: objectHit.y }, 30, 5, 80);
+          this.blood.spray(objectHit);
           objectHit.isBleeding = true;
           objectHit.bleedingCounter = 500;
 
@@ -155,27 +166,22 @@ export class Controller {
       }
     } else {
       this.hitBox.setVisible(false);
-      this.buttonADownId = 0;
+      this.hitButtonDownId = 0;
     }
 
-    const rocks = this.game.world.children[4].children;
-    for (let i = 0; i < rocks.length; i++) {
-      const rock = rocks[i];
-      if (rock.key === 'rock') {
-        if (rock.isBleeding) {
-          const oldPos = rock.previousPosition.x * rock.previousPosition.y;
-          const newPos = rock.position.x * rock.position.y;
-          if (oldPos !== newPos) {
-            rock.bleedingCounter--;
-            if (rock.bleedingCounter) {
-              // this.drawBlood({ x: rock.x, y: rock.y }, 1.2, 3, 20);
-            } else {
-              rock.isBleeding = false;
-            }
-          }
-        }
+    // dodge button pressed
+    if (this.pad1.isDown(Phaser.Gamepad.PS3XC_CIRCLE)) {
+      const dodgeButton = this.pad1.getButton(Phaser.Gamepad.PS3XC_CIRCLE);
+      if (this.dodgeButtonDownId !== dodgeButton.timeDown) {
+        this.dodgeButtonDownId = dodgeButton.timeDown;
+        this.dodgeDuration = 3;
       }
+    } else {
+      this.dodgeButtonDownId = 0;
     }
+
+
+    // this.blood.bleedMovingCharacters();
   }
 
   drawTargetBoundsBoxes() {
@@ -293,73 +299,8 @@ export class Controller {
     }
   }
 
-  drawBlood(pos, dropCount, maxDropSize, spread) {
-    let count = Math.ceil(dropCount * Math.random());
+  drawSword() {
 
-    const splat = () => {
-      count--;
-      if (count) {
-        setTimeout(() => {
-          const x = pos.x -  (Math.random() * spread) + spread / 2;
-          const y = pos.y - (Math.random() * spread) + spread / 2;
-          const r = Math.random() * maxDropSize;
-          const drop = this.game.add.graphics(x, y);
-          drop.anchor.set(0);
-          drop.beginFill(0xB90000, 1);
-          drop.drawEllipse(0, 0, r * 2, r);
-          drop.endFill();
-          this.bloodGroup.add(drop);
-          splat();
-        }, 5);
-      } else {
-        this.cleanUpBlood();
-      }
-    };
-    splat();
-  }
-
-  cleanUpBlood() {
-    const numberOfSplats = 800;
-    if (this.bloodGroup.children.length > numberOfSplats) {
-      const diff = this.bloodGroup.children.length - numberOfSplats;
-      for (let i = 0; i < diff; i++) {
-        const splat = this.bloodGroup.children[i];
-        splat.alpha -= 0.01;
-        if (splat.alpha < 0.1) {
-          splat.kill();
-        }
-      }
-    }
-    for (let i = this.bloodGroup.children.length-1; i > 0; i--) {
-      if (this.bloodGroup.children[i].alive === false) {
-        this.bloodGroup.children.splice(i, 1);
-      }
-    }
-  }
-
-  spray(target) {
-    const splatGroupSpread = 1.5;
-    const numberOfSpatGroups = 3;
-    let count = 0;
-
-    const splat = () => {
-      if (count < numberOfSpatGroups) {
-        setTimeout(() => {
-          const splatGroupPos = {
-            x: target.position.x + (this.player.position.x - target.position.x) * (((1 / numberOfSpatGroups) * count ) * splatGroupSpread),
-            y: target.position.y + (this.player.position.y - target.position.y) * (((1 / numberOfSpatGroups) * count ) * splatGroupSpread)
-          };
-          const newPoints = rotate(target.position.x, target.position.y, splatGroupPos.x, splatGroupPos.y, -45);
-          if (count === 1) {
-            this.drawBlood({x: target.position.x , y: target.position.y}, 10, 5, 40);
-          }
-          this.drawBlood(newPoints, (10 * count), (3 / count) * 2, (count * 20));
-          splat();
-        }, 10);
-        count++;
-      }
-    };
-    splat();
   }
 }
 
