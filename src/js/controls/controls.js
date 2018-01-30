@@ -5,12 +5,13 @@ import { rotate, getAngleDeg } from '../utils/isometric_utils.js';
 import { Blood } from './blood.js';
 
 export class Controller {
-  constructor(game, player, hitBox, viewBox, targetBox, bloodGroup) {
+  constructor(game, player, hitBox, viewBox, targetBox, bloodGroup, sword) {
     this.game = game;
     this.player = player;
     this.hitBox = hitBox;
     this.viewBox = viewBox;
     this.targetBox = targetBox;
+    this.sword = sword;
     this.boundsBoxA;
     this.boundsBoxB;
     this.targetObj = null;
@@ -19,6 +20,7 @@ export class Controller {
     this.game.input.gamepad.start();
     this.game.input.gamepad.setDeadZones(0.05);
     this.hitButtonDownId = 0;
+    this.hitDuration = 0;
     this.dodgeButtonDownId = 0;
     this.dodgeDuration = 0;
 
@@ -49,17 +51,13 @@ export class Controller {
     const SPEED = 170;
     const HIT_RADIUS = 50;
     const TARGET_RADIUS = 100;
+    const TOTAL_HIT_DURATION = 6;
     let speedBonus = 1;
     if (this.dodgeDuration !== 0) {
       this.dodgeDuration--;
       if (aimLock) {
         speedBonus += 5;
       }
-    }
-
-    if (this.hitDuration !== 0) {
-      this.hitDuration--;
-      this.drawSword();
     }
 
     // move player
@@ -75,38 +73,42 @@ export class Controller {
       Y = -(this.player.position.y - this.targetBox.y());
     }
 
+    const isMoving = (X_VALUE !== 0 || Y_VALUE !== 0);
     const angle = getAngleDeg(X, -Y);
 
-    if (angle < 30 || angle > 330) {
-      this.player.animations.play('N');
-    }
-    else if (angle < 60) {
-      this.player.animations.play('NE');
-    }
-    else if (angle < 120) {
-      this.player.animations.play('E');
-    }
-    else if (angle < 150) {
-      this.player.animations.play('SE');
-    }
-    else if (angle < 210) {
-      this.player.animations.play('S');
-    }
-    else if (angle < 240) {
-      this.player.animations.play('SW');
-    }
-    else if (angle < 300) {
-      this.player.animations.play('W');
-    }
-    else if (angle < 330) {
-      this.player.animations.play('NW');
-    }
-    else {
-      this.player.animations.stop();
+    this.sword.setVisible(false);
+    if (this.hitDuration !== 0) {
+      this.hitDuration--;
+      this.swingSword(this.hitDuration, TOTAL_HIT_DURATION, angle);
     }
 
-    const isMoving = (X_VALUE !== 0 || Y_VALUE !== 0);
     if (isMoving) {
+      if (angle < 30 || angle > 330) {
+        this.player.animations.play('N');
+      }
+      else if (angle < 60) {
+        this.player.animations.play('NE');
+      }
+      else if (angle < 120) {
+        this.player.animations.play('E');
+      }
+      else if (angle < 150) {
+        this.player.animations.play('SE');
+      }
+      else if (angle < 210) {
+        this.player.animations.play('S');
+      }
+      else if (angle < 240) {
+        this.player.animations.play('SW');
+      }
+      else if (angle < 300) {
+        this.player.animations.play('W');
+      }
+      else if (angle < 330) {
+        this.player.animations.play('NW');
+      } else {
+        this.player.animations.stop();
+      }
 
       const HYP = Math.sqrt((X * X) + (Y * Y));
       const hitScaler = HIT_RADIUS / HYP;
@@ -123,6 +125,8 @@ export class Controller {
         this.targetBox.setX(this.player.position.x + targetScaler * X);
         this.targetBox.setY(this.player.position.y + targetScaler * Y);
       }
+    } else {
+      this.player.animations.stop();
     }
 
     if (aimLock && this.targetObj !== null) {
@@ -145,7 +149,7 @@ export class Controller {
         // same as the last one.
         // i.e. only register one hit per button press.
         this.hitButtonDownId = hitButton.timeDown;
-        this.hitDuration = 3;
+        this.hitDuration = TOTAL_HIT_DURATION;
         this.hitBox.setVisible(true);
 
         const objectHit = this.drawHitBoundsBox();
@@ -291,7 +295,7 @@ export class Controller {
           if (this.boundsBoxB !== undefined) {
             this.boundsBoxB.kill();
           }
-          this.boundsBoxA = drawBoundsBox(this.game, boundsA, 0x0000FF);
+          // this.boundsBoxA = drawBoundsBox(this.game, boundsA, 0x0000FF);
           this.boundsBoxB = drawBoundsBox(this.game, boundsB, 0x0000FF);
           return target;
         }
@@ -299,8 +303,15 @@ export class Controller {
     }
   }
 
-  drawSword() {
+  swingSword(hitDuration, totalHitDuration) {
+    const HALF_SWING_RANGE = -45;
+    const swingAngle = ((HALF_SWING_RANGE * 2) / totalHitDuration) * (totalHitDuration - hitDuration) - (HALF_SWING_RANGE + HALF_SWING_RANGE / totalHitDuration);
+    // console.log(hitDuration, totalHitDuration, this.viewBox.angle(), swingAngle);
+    this.sword.setVisible(true);
+    this.sword.setX(this.player.position.x);
+    this.sword.setY(this.player.position.y);
 
+    this.sword.setAngle(this.viewBox.angle() + swingAngle);
   }
 }
 

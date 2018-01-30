@@ -36,6 +36,10 @@ export class Shape {
     return this.shape.visible;
   }
 
+  angle() {
+    return this.shape.angle;
+  }
+
   setX(x) {
     this.shape.x = x;
   }

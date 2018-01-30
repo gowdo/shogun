@@ -1,5 +1,5 @@
 import { Controller } from '../controls/controls.js';
-import { ViewBox, TargetBox, HitBox } from '../elements/boxes/index.js';
+import { ViewBox, TargetBox, HitBox, Sword } from '../elements/boxes/index.js';
 // import { ViewBox } from '../elements/boxes/view_box.js';
 const width = window.innerWidth;
 // const height = window.innerHeight;
@@ -222,7 +222,8 @@ export class Play extends Phaser.State {
     const hitBox = new HitBox(this.game, shapesGroup);
     const viewBox = new ViewBox(this.game, shapesGroup);
     const targetBox = new TargetBox(this.game, shapesGroup);
-    controller = new Controller(this.game, player, hitBox, viewBox, targetBox, bloodGroup);
+    const sword = new Sword(this.game, shapesGroup);
+    controller = new Controller(this.game, player, hitBox, viewBox, targetBox, bloodGroup, sword);
 
     // enable physics on the player
     this.game.physics.isoArcade.enable(player);
@@ -271,9 +272,9 @@ export class Play extends Phaser.State {
   }
 
   render() {
-    obstacleGroup.forEach((tile) => {
-      this.game.debug.body(tile, 'rgba(189, 221, 235, 0.6)', false);
-    });
+    // obstacleGroup.forEach((tile) => {
+    //   this.game.debug.body(tile, 'rgba(189, 221, 235, 0.6)', false);
+    // });
   }
 }
 
